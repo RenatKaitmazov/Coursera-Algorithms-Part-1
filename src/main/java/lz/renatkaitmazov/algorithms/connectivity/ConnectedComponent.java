@@ -112,8 +112,6 @@ public abstract class ConnectedComponent {
      */
 
     public final boolean union(int element1, int element2) {
-        validateIndex(element1);
-        validateIndex(element2);
         if (isConnected(element1, element2)) {
             return false;
         }
@@ -127,6 +125,9 @@ public abstract class ConnectedComponent {
     /**
      * The implementation should be provided by classes
      * extending this class.
+     * Subclasses should not perform index checking.
+     * The index is guaranteed to be correct by the time the method
+     * will be called.
      *
      * @param element1 the first element.
      * @param element2 the second element.
@@ -148,44 +149,25 @@ public abstract class ConnectedComponent {
     public final boolean isConnected(int element1, int element2) {
         validateIndex(element1);
         validateIndex(element2);
-        return checkConnected(element1, element2);
+        // The two elements are connected to each other if and only if
+        // they have the same entry id.
+        return findId(element1) == findId(element2);
     }
-
-
-    /**
-     * The implementation should be provided by classes
-     * extending this class.
-     *
-     * @param element1 the first element.
-     * @param element2 the second element.
-     * @return <code>true</code> if the elements are connected,
-     * <code>false</code> otherwise.
-     */
-
-    abstract boolean checkConnected(int element1, int element2);
 
     /**
      * Returns the entry id of the given element.
      * The method is used internally for convenience.
-     *
-     * @param element whose id we are looking for.
-     * @return an id of the element form {@link #elements}.
-     */
-
-    final int findId(int element) {
-        validateIndex(element);
-        return find(element);
-    }
-
-    /**
      * The implementation should be provided by classes
      * extending this class.
+     * Subclasses should not perform index checking.
+     * The index is guaranteed to be correct by the time the method
+     * will be called.
      *
      * @param element whose id we are looking for.
      * @return an id of the element form {@link #elements}.
      */
 
-    abstract int find(int element);
+    abstract int findId(int element);
 
     /*--------------------------------------------------------*/
     /* Object class methods

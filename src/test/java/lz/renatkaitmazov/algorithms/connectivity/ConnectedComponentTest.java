@@ -27,12 +27,7 @@ public final class ConnectedComponentTest {
             }
 
             @Override
-            final boolean checkConnected(int element1, int element2) {
-                return false;
-            }
-
-            @Override
-            final int find(int element) {
+            final int findId(int element) {
                 return 0;
             }
         };

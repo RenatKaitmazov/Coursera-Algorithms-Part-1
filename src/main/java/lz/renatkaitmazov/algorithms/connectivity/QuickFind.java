@@ -44,14 +44,7 @@ public final class QuickFind extends ConnectedComponent {
     }
 
     @Override
-    final boolean checkConnected(int element1, int element2) {
-        // element1 is connected to element2 if and only if
-        // they have the same entry id.
-        return findId(element1) == findId(element2);
-    }
-
-    @Override
-    final int find(int element) {
+    final int findId(int element) {
         return elements[element];
     }
 }
