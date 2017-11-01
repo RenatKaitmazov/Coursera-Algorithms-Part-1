@@ -24,11 +24,8 @@ public final class QuickFind extends ConnectedComponent {
     /*--------------------------------------------------------*/
 
     @Override
-    final boolean connect(int element1, int element2) {
-        // First we find entry ids of the given elements.
-        final int id1 = findId(element1);
-        final int id2 = findId(element2);
-        // Then we assign the id of the first element to
+    final boolean connect(int id1, int id2) {
+        // We assign the id of the first element to
         // the id of the second element.
         // It takes time proportional to the amount of elements.
         // Not an efficient algorithm.

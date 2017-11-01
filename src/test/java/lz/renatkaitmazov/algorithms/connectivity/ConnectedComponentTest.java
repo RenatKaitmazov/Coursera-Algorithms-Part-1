@@ -22,7 +22,7 @@ public final class ConnectedComponentTest {
     public final void setUp() {
         component = new ConnectedComponent(numberOfComponents) {
             @Override
-            final boolean connect(int element1, int element2) {
+            final boolean connect(int id1, int id2) {
                 return false;
             }
 

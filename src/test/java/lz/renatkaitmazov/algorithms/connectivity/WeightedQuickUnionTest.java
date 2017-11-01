@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.lang.reflect.Field;
+
 import static org.junit.Assert.*;
 
 /**
@@ -13,23 +15,40 @@ import static org.junit.Assert.*;
  */
 
 @RunWith(JUnit4.class)
-public final class QuickUnionTest {
+public final class WeightedQuickUnionTest {
 
     private ConnectedComponent quickUnion;
     private final int numberOfComponents = 10;
 
     @Before
     public final void setUp() {
-        quickUnion = new QuickUnion(numberOfComponents);
+        quickUnion = new WeightedQuickUnion(numberOfComponents);
     }
 
     @Test
-    public final void unionTest() {
+    public final void initWeightsTest() throws Exception {
+        final WeightedQuickUnion union = (WeightedQuickUnion) quickUnion;
+        @SuppressWarnings("unckecked")
+        final Class<WeightedQuickUnion> clazz = (Class<WeightedQuickUnion>) union.getClass();
+        final Field weightsField = clazz.getDeclaredField("weights");
+        weightsField.setAccessible(true);
+        final int[] weights = (int[]) weightsField.get(union);
+        for (final int weight : weights) {
+            assertEquals(1, weight);
+        }
+    }
+
+    @Test
+    public final void unionTest() throws Exception {
         assertTrue(quickUnion.union(4, 3));
         assertTrue(quickUnion.union(3, 8));
         assertTrue(quickUnion.union(6, 5));
         assertTrue(quickUnion.union(9, 4));
         assertTrue(quickUnion.union(2, 1));
+        assertArrayEquals(
+                new int[]{0, 2, 2, 4, 4, 6, 6, 7, 4, 4},
+                quickUnion.elements
+        );
 
         assertEquals(5, quickUnion.components());
 
@@ -44,6 +63,20 @@ public final class QuickUnionTest {
 
         assertTrue(quickUnion.union(0, 9));
         assertEquals(1, quickUnion.components());
+
+        final WeightedQuickUnion union = (WeightedQuickUnion) quickUnion;
+        @SuppressWarnings("unchecked")
+        final Class<WeightedQuickUnion> clazz = (Class<WeightedQuickUnion>) union.getClass();
+        final Field weightsField = clazz.getDeclaredField("weights");
+        weightsField.setAccessible(true);
+        final int[] weights = (int[]) weightsField.get(union);
+        // The ultimate root is 6. Its weight must be 10 (contains all the elements)
+        assertEquals(10, weights[6]);
+
+        assertArrayEquals(
+                new int[]{6, 2, 6, 4, 6, 6, 6, 2, 4, 4},
+                quickUnion.elements
+        );
     }
 
     @Test

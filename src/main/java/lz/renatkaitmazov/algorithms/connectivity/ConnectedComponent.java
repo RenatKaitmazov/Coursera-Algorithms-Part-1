@@ -36,7 +36,7 @@ public abstract class ConnectedComponent {
      * the number of elements in one of the sets has increased.
      */
 
-    int numberOfComponents;
+    private int numberOfComponents;
 
     /**
      * An array of elements used to model connected components.
@@ -53,7 +53,7 @@ public abstract class ConnectedComponent {
 
     public ConnectedComponent(int numberOfComponents) {
         this.numberOfComponents = numberOfComponents;
-        this.elements = new int[numberOfComponents];
+        elements = new int[numberOfComponents];
         initElements(elements, numberOfComponents);
     }
 
@@ -112,10 +112,15 @@ public abstract class ConnectedComponent {
      */
 
     public final boolean union(int element1, int element2) {
-        if (isConnected(element1, element2)) {
+        validateIndex(element1);
+        validateIndex(element2);
+        final int id1 = findId(element1);
+        final int id2 = findId(element2);
+        if (id1 == id2) {
+            // Already connected
             return false;
         }
-        if (connect(element1, element2)) {
+        if (connect(id1, id2)) {
             --numberOfComponents;
             return true;
         }
@@ -129,13 +134,13 @@ public abstract class ConnectedComponent {
      * The index is guaranteed to be correct by the time the method
      * will be called.
      *
-     * @param element1 the first element.
-     * @param element2 the second element.
+     * @param id1 the id of the first element.
+     * @param id2 the id of the second element.
      * @return <code>true</code> if managed to connect the given
      * elements, <code>false</code> otherwise.
      */
 
-    abstract boolean connect(int element1, int element2);
+    abstract boolean connect(int id1, int id2);
 
     /**
      * Checks to see if the given elements are connected.
@@ -174,6 +179,7 @@ public abstract class ConnectedComponent {
     /*--------------------------------------------------------*/
 
     @Override
+    @SuppressWarnings("StringBufferReplaceableByString")
     public final String toString() {
         return new StringBuilder("Number of components: ")
                 .append(numberOfComponents)
