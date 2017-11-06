@@ -57,6 +57,10 @@ public class ArrayStack<T> implements Stack<T> {
         items = (T[]) new Object[capacity];
     }
 
+    /*--------------------------------------------------------*/
+    /* Object class methods
+    /*--------------------------------------------------------*/
+
     @Override
     public final String toString() {
         if (isEmpty()) {
