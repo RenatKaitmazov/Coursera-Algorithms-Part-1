@@ -1,0 +1,48 @@
+Question 1:
+Social network connectivity.
+Given a social network containing N members and a log file containing M timestamps at which times
+pairs of members formed friendships, design an algorithm to determine the earliest time at which
+all members are connected (i.e., every member is a friend of a friend of a friend ... of a friend).
+Assume that the log file is sorted by timestamp and that friendship is an equivalence relation.
+The running time of your algorithm should be M*logN or better and use extra space proportional to N.
+
+Solution:
+In order to solve this problem, we need to use the weighted variant of the quick union algorithm
+because it gives us the worst case running time of N*logN when performing the union operation
+and checking if two elements are connected.
+We iterate over the log file, performing the union operation for each entry.
+When the number of connected components is equal to 1 we stop iterating because if in this case
+everyone is connected to the rest given that a friendship is an equivalence relation.
+
+---
+
+Question 2:
+Union-find with specific canonical element.
+Add a method find() to the union-find data type so that find(i) returns the largest element
+in the connected component containing i. The operations, union(), connected(), and find()
+should all take logarithmic time or better.
+For example, if one of the connected components is {1,2,6,9}, then the find() method should
+return 9 for each of the four elements in the connected components.
+
+Solution:
+Create an auxiliary array (let's call it maxElements) to hold the maximum element of each
+connected component. It is set up just like the ids array.
+When performing the union operation, we first check the maximum values of each of the components
+like this maxElements[find(p)], maxElements[find(q)], and then compare these two values
+to determine the absolute maximum value. Then we just update the maxElements array like this
+maxElements[find(p)] = absolute max value
+or
+maxElements[find(q)] = absolute max value
+depending on which tree goes below the other tree.
+
+---
+
+Question 3:
+Successor with delete.
+Given a set of N integers S={0,1,...,N−1} and a sequence of requests of the following form:
+• Remove x from S
+• Find the successor of x: the smallest y in S such that y≥x.
+design a data type so that all operations (except construction) should take logarithmic
+time or better.
+
+Solution:
