@@ -1,4 +1,4 @@
-package lz.renatkaitmazov.algorithms.stackqueue;
+package lz.renatkaitmazov.algorithms.week2;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -10,7 +10,7 @@ import java.util.Objects;
  * @author Renat Kaitmazov
  */
 
-public class LinkedList<T> implements List<T> {
+public final class LinkedList<T> implements List<T> {
 
     /*--------------------------------------------------------*/
     /* Fields

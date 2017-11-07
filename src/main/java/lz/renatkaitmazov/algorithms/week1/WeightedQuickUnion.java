@@ -1,7 +1,7 @@
-package lz.renatkaitmazov.algorithms.connectivity;
+package lz.renatkaitmazov.algorithms.week1;
 
 /**
- * A concrete implementation to solve dynamic connectivity problem.
+ * A concrete implementation to solve dynamic week1 problem.
  * Interprets connected components as a tree of elements where
  * each array entry holds a reference to its immediate root.
  * This kind of algorithms allows for fast union operation and

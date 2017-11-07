@@ -1,4 +1,4 @@
-package lz.renatkaitmazov.algorithms.stackqueue;
+package lz.renatkaitmazov.algorithms.week2;
 
 import java.util.Iterator;
 
@@ -9,7 +9,7 @@ import java.util.Iterator;
  * @author Renat Kaitmazov
  */
 
-public class ArrayStack<T> implements Stack<T> {
+public final class ArrayStack<T> implements Stack<T> {
 
     /*--------------------------------------------------------*/
     /* Static

@@ -1,4 +1,4 @@
-package lz.renatkaitmazov.algorithms.connectivity.homework;
+package lz.renatkaitmazov.algorithms.week1.homework;
 
 /**
  * @author Renat Kaitmazov

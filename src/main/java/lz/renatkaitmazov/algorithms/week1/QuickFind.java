@@ -1,7 +1,7 @@
-package lz.renatkaitmazov.algorithms.connectivity;
+package lz.renatkaitmazov.algorithms.week1;
 
 /**
- * A concrete implementation to solve dynamic connectivity problem.
+ * A concrete implementation to solve dynamic week1 problem.
  * Allows the client to check if two elements are connected in
  * a constant time. Not efficient when performing the union command,
  * since it uses the so-called eager approach.

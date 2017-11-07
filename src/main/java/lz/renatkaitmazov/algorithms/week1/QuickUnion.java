@@ -1,7 +1,7 @@
-package lz.renatkaitmazov.algorithms.connectivity;
+package lz.renatkaitmazov.algorithms.week1;
 
 /**
- * A concrete implementation to solve dynamic connectivity problem.
+ * A concrete implementation to solve dynamic week1 problem.
  * In the worst case scenario both operations can take linear time.
  * But on average the union operation is faster than quick find's
  * union operation.

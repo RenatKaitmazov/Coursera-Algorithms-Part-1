@@ -1,4 +1,4 @@
-package lz.renatkaitmazov.algorithms.connectivity;
+package lz.renatkaitmazov.algorithms.week1;
 
 import java.util.Arrays;
 

@@ -1,7 +1,7 @@
-package lz.renatkaitmazov.algorithms.stackqueue;
+package lz.renatkaitmazov.algorithms.week2;
 
 /**
- * An abstraction for a stack data type.
+ * An abstraction for a stack data type (Last In First Out).
  * Includes the very basic operations.
  *
  * @author Renat Kaitmazov

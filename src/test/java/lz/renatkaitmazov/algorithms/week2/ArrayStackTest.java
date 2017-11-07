@@ -1,4 +1,4 @@
-package lz.renatkaitmazov.algorithms.stackqueue;
+package lz.renatkaitmazov.algorithms.week2;
 
 import org.junit.After;
 import org.junit.Before;
