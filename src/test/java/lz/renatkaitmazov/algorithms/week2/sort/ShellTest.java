@@ -14,13 +14,13 @@ import static lz.renatkaitmazov.algorithms.week2.sort.SortUtil.getUnsortedIntege
  */
 
 @RunWith(JUnit4.class)
-public class InsertionTest {
+public final class ShellTest {
 
     @Test
     public void sort100Test() {
         final Integer[] numbers = getUnsortedIntegerArray(100);
         assertFalse(isSorted(numbers));
-        Insertion.sort(numbers);
+        Shell.sort(numbers);
         assertTrue(isSorted(numbers));
     }
 
@@ -28,15 +28,15 @@ public class InsertionTest {
     public void sort1000Test() {
         final Integer[] numbers = getUnsortedIntegerArray(1_000);
         assertFalse(isSorted(numbers));
-        Insertion.sort(numbers);
+        Shell.sort(numbers);
         assertTrue(isSorted(numbers));
     }
 
     @Test
-    public void sort5000Test() {
-        final Integer[] numbers = getUnsortedIntegerArray(5_000);
+    public void sort50000Test() {
+        final Integer[] numbers = getUnsortedIntegerArray(50_000);
         assertFalse(isSorted(numbers));
-        Insertion.sort(numbers);
+        Shell.sort(numbers);
         assertTrue(isSorted(numbers));
     }
 
@@ -44,7 +44,7 @@ public class InsertionTest {
     public void sort100000AlreadySortedArrayTest() {
         final Integer[] numbers = getSortedIntegerArray(100_000);
         assertTrue(isSorted(numbers));
-        Insertion.sort(numbers);
+        Shell.sort(numbers);
         assertTrue(isSorted(numbers));
     }
 }
