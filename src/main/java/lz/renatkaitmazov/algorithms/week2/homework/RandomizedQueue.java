@@ -106,9 +106,7 @@ public final class RandomizedQueue<Item> implements Iterable<Item> {
 
     public Item dequeue() {
         ensureNotEmpty();
-        final int randomIndex = StdRandom.uniform(size);
-        swap(items, randomIndex, --size);
-        final Item itemToDequeue = items[size];
+        final Item itemToDequeue = items[--size];
         items[size] = null; // Avoid loitering
         final int capacity = items.length;
         if ((capacity >> 2) >= size) {

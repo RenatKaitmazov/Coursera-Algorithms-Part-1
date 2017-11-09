@@ -31,7 +31,7 @@ public class SelectionTest {
 
     @Test
     public void sort100Items() {
-        final Integer[] array = getArrayWithRandomData(100);
+        final Integer[] array = getUnsortedArray(100);
         assertFalse(SortUtil.isSorted(array));
         Selection.sort(array);
         assertTrue(SortUtil.isSorted(array));
@@ -39,7 +39,7 @@ public class SelectionTest {
 
     @Test
     public void sort1000Items() {
-        final Integer[] array = getArrayWithRandomData(1_000);
+        final Integer[] array = getUnsortedArray(1_000);
         assertFalse(SortUtil.isSorted(array));
         Selection.sort(array);
         assertTrue(SortUtil.isSorted(array));
@@ -47,13 +47,13 @@ public class SelectionTest {
 
     @Test
     public void sort5000Items() {
-        final Integer[] array = getArrayWithRandomData(5_000);
+        final Integer[] array = getUnsortedArray(5_000);
         assertFalse(SortUtil.isSorted(array));
         Selection.sort(array);
         assertTrue(SortUtil.isSorted(array));
     }
 
-    private Integer[] getArrayWithRandomData(int size) {
+    private Integer[] getUnsortedArray(int size) {
         final Integer[] numbers = new Integer[size];
         for (int i = 0; i < size; ++i) {
             numbers[i] = random.nextInt(size << 1);
