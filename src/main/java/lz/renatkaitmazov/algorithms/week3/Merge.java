@@ -1,5 +1,7 @@
 package lz.renatkaitmazov.algorithms.week3;
 
+import lz.renatkaitmazov.algorithms.week2.sort.Insertion;
+
 import static lz.renatkaitmazov.algorithms.week2.sort.SortUtil.isLessThan;
 
 /**
@@ -13,6 +15,13 @@ import static lz.renatkaitmazov.algorithms.week2.sort.SortUtil.isLessThan;
  */
 
 public final class Merge {
+
+    /**
+     * The amount of elements in a subarray that should be sorted using
+     * the insertion sort.
+     */
+
+    private static final int THRESHOLD = 7;
 
     private Merge() {
     }
@@ -31,15 +40,28 @@ public final class Merge {
                                                        final T[] auxiliary,
                                                        int startIndex,
                                                        int endIndex) {
-        // If the there is only one element, then the array is sorted.
-        if (startIndex >= endIndex) return;
+        if ((endIndex - startIndex + 1) <= THRESHOLD) {
+            // It is more efficient to sort small subarrays using the insertion sort.
+            // Reduces the amount of recursive calls.
+            Insertion.sort(array, startIndex, endIndex);
+            return;
+        }
 
         // A better way to calculate the midpoint to avoid integer overflowing.
         final int middleIndex = startIndex + ((endIndex - startIndex) >> 1);
+
         // Sort the left part.
         sort(array, auxiliary, startIndex, middleIndex);
+
         // Sort the right part.
         sort(array, auxiliary, middleIndex + 1, endIndex);
+
+        // If the first item from the right part is not smaller
+        // than the last item from the first part, then the two subarrays are sorted.
+        if (!isLessThan(array[middleIndex + 1], array[middleIndex])) {
+            return;
+        }
+
         // Merge the results.
         merge(array, auxiliary, startIndex, middleIndex, endIndex);
     }
