@@ -66,7 +66,7 @@ public final class Merge {
         merge(array, auxiliary, startIndex, middleIndex, endIndex);
     }
 
-    private static <T extends Comparable<T>> void merge(final T[] array,
+    static <T extends Comparable<T>> void merge(final T[] array,
                                                         final T[] auxiliary,
                                                         int startIndex,
                                                         int middleIndex,
