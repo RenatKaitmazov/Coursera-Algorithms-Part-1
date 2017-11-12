@@ -13,7 +13,7 @@ import static lz.renatkaitmazov.algorithms.week2.sort.SortUtil.getUnsortedIntege
  */
 
 @RunWith(JUnit4.class)
-public class MergeTest {
+public final class MergeTest {
 
     @Test
     public void sortOddSizedArrayTest() {

@@ -49,7 +49,7 @@ public final class Quick {
         sort(array, partition + 1, endIndex);
     }
 
-    private static <T extends Comparable<T>> int partition(final T[] array, int start, int end) {
+    static <T extends Comparable<T>> int partition(final T[] array, int start, int end) {
         final int middle = start + ((end - start) >> 1);
         median(array, start, middle, end);
         swap(array, start, middle);

@@ -14,7 +14,7 @@ import static lz.renatkaitmazov.algorithms.week2.sort.SortUtil.getUnsortedIntege
  */
 
 @RunWith(JUnit4.class)
-public class BottomUpMergeTest {
+public final class BottomUpMergeTest {
 
     @Test
     public void sort11Items() {

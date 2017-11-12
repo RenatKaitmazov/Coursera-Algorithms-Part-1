@@ -4,8 +4,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.util.Arrays;
-
 import static org.junit.Assert.*;
 import static lz.renatkaitmazov.algorithms.week2.sort.SortUtil.isSorted;
 import static lz.renatkaitmazov.algorithms.week2.sort.SortUtil.getSortedIntegerArray;
