@@ -51,4 +51,12 @@ public final class SortUtil {
         }
         return numbers;
     }
+
+    public static <T> void shuffle(final T[] array) {
+        final int size = array.length;
+        for (int i = 0; i < size; ++i) {
+            final int randomIndex = RANDOM.nextInt(i + 1);
+            swap(array, i, randomIndex);
+        }
+    }
 }
