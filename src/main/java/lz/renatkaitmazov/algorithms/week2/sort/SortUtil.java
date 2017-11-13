@@ -44,10 +44,13 @@ public final class SortUtil {
     }
 
     public static Integer[] getUnsortedIntegerArray(int size) {
+        return getUnsortedIntegerArray(size, size << 1);
+    }
+
+    public static Integer[] getUnsortedIntegerArray(int size, int upperBound) {
         final Integer[] numbers = new Integer[size];
-        final int bound = size << 1;
         for (int i = 0; i < size; ++i) {
-            numbers[i] = RANDOM.nextInt(bound);
+            numbers[i] = RANDOM.nextInt(upperBound);
         }
         return numbers;
     }

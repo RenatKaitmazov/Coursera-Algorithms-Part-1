@@ -75,7 +75,7 @@ public final class Quick {
     }
 
 
-    private static <T extends Comparable<T>> void median(final T[] array, int start, int middle, int end) {
+    static <T extends Comparable<T>> void median(final T[] array, int start, int middle, int end) {
         if (!isLessThan(array[start], array[middle])) swap(array, start, middle);
         if (!isLessThan(array[start], array[end])) swap(array, start, end);
         if (!isLessThan(array[middle], array[end])) swap(array, middle, end);
