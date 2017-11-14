@@ -36,22 +36,29 @@ public final class FastCollinearPoints {
     private static LineSegment[] findLineSegments(Point[] pointsByY) {
         final List<LineSegment> segmentList = new LinkedList<>();
         final int size = pointsByY.length;
+        final Point[] pointsBySlope = new Point[size];
+        Point lastPoint = null;
         for (int a = 0; a < size; ++a) {
-            final Point[] pointsBySlope = new Point[size];
-            System.arraycopy(pointsByY, a + 1, pointsBySlope, a + 1, size - a - 1);
+            final int newSize = size - a - 1;
+            if (newSize < 3) break;
+            System.arraycopy(pointsByY, a + 1, pointsBySlope, 0, newSize);
             final Point pivot = pointsByY[a];
-            Arrays.sort(pointsBySlope, a + 1, size, pivot.slopeOrder());
+            Arrays.sort(pointsBySlope, 0, newSize, pivot.slopeOrder());
 
             final Predicate equal = ((lhs, rhs) -> pivot.slopeTo(lhs) == pivot.slopeTo(rhs));
-            final int start = calculateIndex(pointsBySlope, a + 1, size, equal);
+            final int start = calculateIndex(pointsBySlope, 0, newSize, equal);
             if (start < 0) continue;
 
             final Predicate notEqual = ((lhs, rhs) -> pivot.slopeTo(lhs) != pivot.slopeTo(rhs));
-            int end = calculateIndex(pointsBySlope, start + 1, size, notEqual);
-            end = (end < 0) ? size - 1 : end;
+            int end = calculateIndex(pointsBySlope, start + 1, newSize, notEqual);
+            end = (end < 0) ? newSize - 1 : end;
 
-            if (end - start + 1 > 2) {
-                final LineSegment lineSegment = new LineSegment(pivot, pointsBySlope[end]);
+            final int pointsOnLine = end - start + 1;
+            if (pointsOnLine > 2) {
+                final Point endPoint = pointsBySlope[end];
+                if (lastPoint == endPoint) continue;
+                lastPoint = endPoint;
+                final LineSegment lineSegment = new LineSegment(pivot, endPoint);
                 segmentList.add(lineSegment);
             }
         }
