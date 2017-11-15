@@ -43,6 +43,18 @@ public final class FastCollinearPointsTest {
         final FastCollinearPoints collinearPoints = new FastCollinearPoints(points);
         final LineSegment[] segments = collinearPoints.segments();
         assertEquals(2, collinearPoints.numberOfSegments());
+        assertEquals("(10000, 0) -> (0, 10000)", segments[0].toString());
+        assertEquals("(3000, 4000) -> (20000, 21000)", segments[1].toString());
+    }
+
+    @Test
+    public void verticalLineTest() {
+        final String fileName = "vertical.txt";
+        final Point[] points = readFromFile(path + fileName);
+        final FastCollinearPoints collinearPoints = new FastCollinearPoints(points);
+        final LineSegment[] segments = collinearPoints.segments();
+        assertEquals(1, collinearPoints.numberOfSegments());
+        assertEquals("(17278, 10446) -> (17278, 15777)", segments[0].toString());
     }
 
     @Test
@@ -52,6 +64,23 @@ public final class FastCollinearPointsTest {
         final FastCollinearPoints collinearPoints = new FastCollinearPoints(points);
         final LineSegment[] segments = collinearPoints.segments();
         assertEquals(4, collinearPoints.numberOfSegments());
+        assertEquals("(10000, 0) -> (0, 10000)", segments[0].toString());
+        assertEquals("(10000, 0) -> (30000, 0)", segments[1].toString());
+        assertEquals("(13000, 0) -> (5000, 12000)", segments[2].toString());
+        assertEquals("(30000, 0) -> (0, 30000)", segments[3].toString());
+    }
+
+    @Test
+    public void trickyInputTest() {
+        final String fileName = "tricky.txt";
+        final Point[] points = readFromFile(path + fileName);
+        final FastCollinearPoints collinearPoints = new FastCollinearPoints(points);
+        final LineSegment[] lineSegments = collinearPoints.segments();
+        assertEquals(4, lineSegments.length);
+        assertEquals("(1, 0) -> (50, 0)", lineSegments[0].toString());
+        assertEquals("(50, 0) -> (50, 50)", lineSegments[1].toString());
+        assertEquals("(0, 1) -> (0, 50)", lineSegments[2].toString());
+        assertEquals("(1, 1) -> (50, 50)", lineSegments[3].toString());
     }
 
     private Point[] readFromFile(String filePath) {

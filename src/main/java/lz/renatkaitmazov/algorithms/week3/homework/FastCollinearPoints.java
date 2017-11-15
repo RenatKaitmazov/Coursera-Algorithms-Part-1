@@ -1,8 +1,12 @@
 package lz.renatkaitmazov.algorithms.week3.homework;
 
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
+import java.util.Arrays;
 
 /**
  * @author Renat Kaitmazov
@@ -10,7 +14,8 @@ import java.util.List;
 
 public final class FastCollinearPoints {
 
-    private final LineSegment[] segments;
+    private final List<LineSegment> listOfSegments = new ArrayList<>();
+    private final Map<Double, List<Point>> pointsPerSlopeMap = new HashMap<>();
     private final int numberOfSegments;
 
     public FastCollinearPoints(Point[] points) {
@@ -19,8 +24,68 @@ public final class FastCollinearPoints {
         final Point[] copy = new Point[size];
         System.arraycopy(points, 0, copy, 0, size);
         validateInput(copy);
-        segments = findLineSegments(copy);
-        numberOfSegments = segments.length;
+        findLineSegments(copy, size);
+        numberOfSegments = listOfSegments.size();
+    }
+
+    private void findLineSegments(Point[] points, int size) {
+        for (int i = 0; i < size; ++i) {
+            // Pick a point as an origin
+            final Point origin = points[i];
+
+            // Copy every point besides the origin into an auxiliary array.
+            final int newSize = size - i - 1;
+            final Point[] copy = new Point[newSize];
+            System.arraycopy(points, i + 1, copy, 0, newSize);
+
+            // Sort them by their slope toward the origin.
+            Arrays.sort(copy, 0, newSize, origin.slopeOrder());
+            // Keep track of the collinear points to avoid duplicates.
+            final List<Point> collinearPoints = new LinkedList<>();
+            for (int j = 1; j < newSize; ++j) {
+                final Point point1 = copy[j - 1];
+                final Point point2 = copy[j];
+                final double slope1 = origin.slopeTo(point1);
+                final double slope2 = origin.slopeTo(point2);
+
+                // Two points are on the same line with the origin
+                if (slope1 == slope2) {
+                    if (collinearPoints.isEmpty()) {
+                        collinearPoints.add(point1);
+                        collinearPoints.add(point2);
+                    } else {
+                        // To avoid duplication.
+                        collinearPoints.add(point2);
+                    }
+
+                    // It is possible that all points are on the same line with the origin.
+                    // This check deals with that situation.
+                    if (j < newSize - 1) {
+                        continue;
+                    }
+                }
+
+                final int collinearPointsCount = collinearPoints.size();
+                // There are at least three points.
+                if (collinearPointsCount > 2) {
+                    // Sort collinear points to check the last point.
+                    Collections.sort(collinearPoints);
+                    final Point tail = collinearPoints.get(collinearPointsCount - 1);
+                    List<Point> tops = pointsPerSlopeMap.get(slope1);
+                    if (tops == null) {
+                        tops = new LinkedList<>();
+                    }
+                    // Add a line segment if it hasn't existed so far.
+                    if (!tops.contains(tail)) {
+                        tops.add(tail);
+                        pointsPerSlopeMap.put(slope1, tops);
+                        final LineSegment segment = new LineSegment(origin, tail);
+                        listOfSegments.add(segment);
+                    }
+                }
+                collinearPoints.clear();
+            }
+        }
     }
 
     public int numberOfSegments() {
@@ -29,64 +94,10 @@ public final class FastCollinearPoints {
 
     public LineSegment[] segments() {
         final LineSegment[] copy = new LineSegment[numberOfSegments];
-        System.arraycopy(segments, 0, copy, 0, numberOfSegments);
+        for (int i = 0; i < numberOfSegments; ++i) {
+            copy[i] = listOfSegments.get(i);
+        }
         return copy;
-    }
-
-    private static LineSegment[] findLineSegments(Point[] pointsByY) {
-        final List<LineSegment> segmentList = new LinkedList<>();
-        final int size = pointsByY.length;
-        final Point[] pointsBySlope = new Point[size];
-        Point lastPoint = null;
-        for (int a = 0; a < size; ++a) {
-            final int newSize = size - a - 1;
-            if (newSize < 3) break;
-            System.arraycopy(pointsByY, a + 1, pointsBySlope, 0, newSize);
-            final Point pivot = pointsByY[a];
-            Arrays.sort(pointsBySlope, 0, newSize, pivot.slopeOrder());
-
-            final Predicate equal = ((lhs, rhs) -> pivot.slopeTo(lhs) == pivot.slopeTo(rhs));
-            final int start = calculateIndex(pointsBySlope, 0, newSize, equal);
-            if (start < 0) continue;
-
-            final Predicate notEqual = ((lhs, rhs) -> pivot.slopeTo(lhs) != pivot.slopeTo(rhs));
-            int end = calculateIndex(pointsBySlope, start + 1, newSize, notEqual);
-            end = (end < 0) ? newSize - 1 : end;
-
-            final int pointsOnLine = end - start + 1;
-            if (pointsOnLine > 2) {
-                final Point endPoint = pointsBySlope[end];
-                if (lastPoint == endPoint) continue;
-                lastPoint = endPoint;
-                final LineSegment lineSegment = new LineSegment(pivot, endPoint);
-                segmentList.add(lineSegment);
-            }
-        }
-        return lineSegmentListToArray(segmentList);
-    }
-
-    private interface Predicate {
-        boolean check(Point lhs, Point rhs);
-    }
-
-    private static int calculateIndex(Point[] points, int start, int size, Predicate predicate) {
-        for (int i = start; i < size - 1; ++i) {
-            final Point lhs = points[i];
-            final Point rhs = points[i + 1];
-            if (predicate.check(lhs, rhs)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private static LineSegment[] lineSegmentListToArray(List<LineSegment> list) {
-        final LineSegment[] array = new LineSegment[list.size()];
-        int i = 0;
-        for (final LineSegment lineSegment : list) {
-            array[i++] = lineSegment;
-        }
-        return array;
     }
 
     private static void validateInput(Point[] points) {
