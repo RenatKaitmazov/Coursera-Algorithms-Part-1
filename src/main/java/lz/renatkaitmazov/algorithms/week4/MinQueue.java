@@ -20,6 +20,6 @@ public final class MinQueue<T extends Comparable<T>> extends AbstractPriorityQue
     }
 
     public MinQueue(int capacity) {
-        super(capacity, Comparator.reverseOrder());
+        super(capacity, Comparator.naturalOrder());
     }
 }
