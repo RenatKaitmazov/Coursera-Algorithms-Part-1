@@ -10,10 +10,8 @@ package lz.renatkaitmazov.algorithms.week4;
  * @author Renat Kaitmazov
  */
 
-public interface SymbolTable<K extends Comparable<K>, V> {
+public interface SymbolTable<K, V> {
 
-    // TODO 2) Add tests for its concrete implementations
-    // TODO 3) Add concrete implementations
 
     /**
      * Returns the amount of items in the queue.
