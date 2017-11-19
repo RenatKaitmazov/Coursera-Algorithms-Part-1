@@ -62,7 +62,7 @@ public final class UnorderedSymbolTable<K, V> implements
 
     @Override
     public V get(K key) {
-        checkNotNull(key);
+        validateNotNull(key);
         final Entry<K, V> entry = getEntry(key);
         if (entry != null) {
             return entry.getValue();
@@ -81,7 +81,7 @@ public final class UnorderedSymbolTable<K, V> implements
 
     @Override
     public void put(K key, V value) {
-        checkNotNull(key);
+        validateNotNull(key);
         if (value == null) {
             // The convention is, that if the value is null and the key
             // is present in the table, that entry will be removed completely.
@@ -106,7 +106,7 @@ public final class UnorderedSymbolTable<K, V> implements
     @SuppressWarnings("unchecked")
     @Override
     public V remove(K key) {
-        checkNotNull(key);
+        validateNotNull(key);
         for (Entry<K, V> current = head, previous = head; current != null; current = current.getNext()) {
             if (current.getKey().equals(key)) {
                 final V tempValue = current.getValue();
@@ -138,7 +138,7 @@ public final class UnorderedSymbolTable<K, V> implements
         return keys;
     }
 
-    private void checkNotNull(K key) {
+    private void validateNotNull(K key) {
         if (key == null) {
             throw new IllegalArgumentException("key is null");
         }
