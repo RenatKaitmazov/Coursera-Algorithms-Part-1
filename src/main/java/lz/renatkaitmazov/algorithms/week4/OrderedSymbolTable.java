@@ -1,6 +1,8 @@
 package lz.renatkaitmazov.algorithms.week4;
 
 import lz.renatkaitmazov.algorithms.week2.LinkedList;
+import lz.renatkaitmazov.algorithms.week2.LinkedQueue;
+import lz.renatkaitmazov.algorithms.week2.Queue;
 
 /**
  * @author Renat Kaitmazov
@@ -53,9 +55,7 @@ public final class OrderedSymbolTable<K extends Comparable<K>, V> implements Sym
 
     @Override
     public String toString() {
-        if (isEmpty()) {
-            return "[]";
-        }
+        if (isEmpty()) return "[]";
         final StringBuilder builder = new StringBuilder("[");
         for (int i = 0; i < size; ++i) {
             final Entry<K, V> entry = entries[i];
@@ -80,47 +80,30 @@ public final class OrderedSymbolTable<K extends Comparable<K>, V> implements Sym
     public void put(K key, V value) {
         validateNotNull(key);
         if (value == null) {
+            // By convention, if the value is null, remove the key associated with the value.
             remove(key);
             return;
         }
-
-        if (isEmpty()) {
-            entries[size] = new Entry<>(key, value);
-        } else {
-            final int ceilIndex = ceiling(key);
-            final Entry<K, V> oldEntry = entries[ceilIndex];
-            if (oldEntry != null && key.equals(oldEntry.getKey())) {
-                // Just update the value of the existing entry.
+        // Number of items less than the key.
+        final int rankOfKey = helperRank(key);
+        if (rankOfKey < size) {
+            // It is not the case that all keys are less than the new key.
+            final Entry<K, V> oldEntry = entries[rankOfKey];
+            if (key.equals(oldEntry.getKey())) {
+                // There already exists an entry with the same key. Duplicates are not allowed.
+                // Just update its value.
                 oldEntry.setValue(value);
                 return;
             }
-            // Insert a new value.
-            final Entry<K, V> newEntry = new Entry<>(key, value);
-            // Check fullness of the table.
-            final int capacity = entries.length;
-            if (size == capacity) {
-                resize(capacity << 1);
-            }
-            // Make a free cell in the array for the newly created entry.
-            System.arraycopy(entries, ceilIndex, entries, ceilIndex + 1, size - ceilIndex);
-            // Insert the entry into the free cell.
-            entries[ceilIndex] = newEntry;
         }
+        // If the table is full, make it twice as big.
+        final int capacity = entries.length;
+        if (size == capacity) resize(capacity << 1);
+        // Shift every key which is larger than the new key to the right by one cell to make a free cell for the
+        // new key.
+        System.arraycopy(entries, rankOfKey, entries, rankOfKey + 1, size - rankOfKey);
+        entries[rankOfKey] = new Entry<>(key, value);
         ++size;
-    }
-
-    private int ceiling(K key) {
-        int start = 0;
-        int end = size - 1;
-        while (start <= end) {
-            final int middle = start + ((end - start) >> 1);
-            final Entry<K, V> guess = entries[middle];
-            final int compareResult = key.compareTo(guess.getKey());
-            if      (compareResult > 0) start = middle + 1;
-            else if (compareResult < 0) end = middle - 1;
-            else return middle;
-        }
-        return start;
     }
 
     private void resize(int newSize) {
@@ -139,21 +122,17 @@ public final class OrderedSymbolTable<K extends Comparable<K>, V> implements Sym
     @Override
     public V remove(K key) {
         validateNotNull(key);
-        if (isEmpty()) {
-            return null;
-        }
-        final int indexOfKey = indexOfKey(key);
-        if (indexOfKey > -1) {
-            // The key is in the table.
-            final Entry<K, V> entryToRemove = removeAt(indexOfKey);
-            --size;
-            final int capacity = entries.length;
-            if ((capacity >> 2) >= size) {
-                // Number of entries in the table is at least four times smaller than the capacity.
-                // Halve the capacity of the backing array.
-                resize(capacity >> 1);
+        if (isEmpty()) return null;
+        // Number of keys less than the given key.
+        final int rankOfKey = helperRank(key);
+        if (rankOfKey < size) {
+            // The given key was not larger than any of other keys in the table.
+            final Entry<K, V> entryToRemove = entries[rankOfKey];
+            if (key.equals(entryToRemove.getKey())) {
+                // Found a match. Remove the key.
+                removeAt(rankOfKey);
+                return entryToRemove.getValue();
             }
-            return entryToRemove.getValue();
         }
         return null;
     }
@@ -161,22 +140,23 @@ public final class OrderedSymbolTable<K extends Comparable<K>, V> implements Sym
     @Override
     public V get(K key) {
         validateNotNull(key);
-        if (isEmpty()) {
-            return null;
-        }
-        final int indexOfKey = indexOfKey(key);
-        if (indexOfKey > -1) {
-            final Entry<K, V> entry = entries[indexOfKey];
-            return entry.getValue();
+        if (isEmpty()) return null;
+        // Number of keys less than the given key.
+        final int rankOfKey = helperRank(key);
+        if (rankOfKey < size) {
+            // The given key was not larger than any of other keys in the table.
+            final Entry<K, V> entry = entries[rankOfKey];
+            if (key.equals(entry.getKey())) {
+                // Successfully found a match.
+                return entry.getValue();
+            }
         }
         return null;
     }
 
     @Override
     public Iterable<K> keys() {
-        if (isEmpty()) {
-            return null;
-        }
+        if (isEmpty()) return null;
         final LinkedList<K> keys = new LinkedList<>();
         for (int i = 0; i < size; ++i) {
             final Entry<K, V> entry = entries[i];
@@ -190,43 +170,89 @@ public final class OrderedSymbolTable<K extends Comparable<K>, V> implements Sym
     /* Additional API methods
     /*--------------------------------------------------------*/
 
-    public int indexOf(K key) {
+    /**
+     * Returns the number of keys less than the given key.
+     *
+     * @param key whose rank should be calculated.
+     * @return number of keys less than <code>key</code>. The number is in [0...size].
+     */
+    public int rank(K key) {
         validateNotNull(key);
-        return indexOfKey(key);
+        return helperRank(key);
     }
 
     /**
-     * A helper method that returns an index of the given key.
-     * Notice that it does not check if the key is null, so call
-     * this method if and only if you are sure that the key is not null.
-     * It is a classical binary search algorithm.
+     * Returns the number of keys less than the given key.
+     * It is assumed that the key is not null.
+     * Call this method if and only if you are sure that the key
+     * is not null. This helper method does not perform any checks.
+     * It is actually a classic binary search algorithm.
+     * The only difference is, it does not return <code>-1</code> if the is
+     * not present in the table.
      *
-     * @param key whose index is looked for.
-     * @return index of the key,
-     * <code>-1</code> if the key is not in the table.
+     * @param key whose rank should be calculated.
+     * @return number of keys less than <code>key</code>. The number is in [0...size].
      */
-    private int indexOfKey(K key) {
-        for (int left = 0, right = size - 1; left <= right; ) {
-            final int middle = left + ((right - left) >> 1);
-            final Entry<K, V> guess = entries[middle];
-            final int compareResult = key.compareTo(guess.getKey());
-            if      (compareResult > 0) left = middle + 1;
-            else if (compareResult < 0) right = middle - 1;
+    private int helperRank(K key) {
+        int start = 0;
+        int end = size - 1;
+        while (end >= start) {
+            final int middle = start + ((end - start) >> 1);
+            final Entry<K, V> guessedEntry = entries[middle];
+            final int compareResult = key.compareTo(guessedEntry.getKey());
+            if      (compareResult < 0) end = middle - 1;
+            else if (compareResult > 0) start = middle + 1;
             else return middle;
         }
-        return -1;
+        return start;
     }
 
+    /**
+     * Returns the largest key less than or equal to the given key.
+     *
+     * @param key a key.
+     * @return the largest key <code><= key</code>,
+     * <code>null</code> if the table is empty.
+     */
     public K floor(K key) {
-        // todo
-        return null;
+        validateNotNull(key);
+        if (isEmpty()) return null;
+        final int rankOfKey = helperRank(key);
+        // If the given key is not larger than any of other keys in the table and
+        // there is a match, then return the given key, since key <= entries[rankOfEntry].
+        if (rankOfKey < size && key.equals(entries[rankOfKey].getKey())) return key;
+        // If the given key is less than the smallest key in the table, then return null,
+        // since there is no a key such that <= the given key.
+        if (rankOfKey == 0 && key.compareTo(entries[0].getKey()) < 0) return null;
+        // Return a key such that < the given key.
+        return entries[rankOfKey - 1].getKey();
     }
 
+    /**
+     * Returns the smallest greater than or equal to the given key.
+     *
+     * @param key a key.
+     * @return the largest key <code>>= key</code>,
+     * <code>null</code> if the table is empty.
+     */
     public K ceil(K key) {
-        // todo
+        validateNotNull(key);
+        if (isEmpty()) return null;
+        // Number of keys smaller than the given key.
+        final int rankOfKey = helperRank(key);
+        // The key is not larger than the table's largest key.
+        if (rankOfKey < size) return entries[rankOfKey].getKey();
         return null;
     }
 
+    /**
+     * Returns a key at the given index.
+     * If the index is out of the table's bounds, a runtime exception is thrown.
+     *
+     * @param index of the key.
+     * @return key at the <code>index</code>
+     * or a runtime exception is thrown, if the index is wrong.
+     */
     public K getKeyAt(int index) {
         validateIndex(index);
         final Entry<K, V> entry = entries[index];
@@ -239,36 +265,128 @@ public final class OrderedSymbolTable<K extends Comparable<K>, V> implements Sym
         }
     }
 
+    /**
+     * Returns the smallest key in the table.
+     *
+     * @return the smallest key,
+     * <code>null</code> if the table is empty.
+     */
     public K min() {
-        if (isEmpty()) {
-            return null;
-        }
+        if (isEmpty()) return null;
         final Entry<K, V> minEntry = entries[0];
         return minEntry.getKey();
     }
 
+    /**
+     * Returns the largest key in the table.
+     *
+     * @return the largest key,
+     * <code>null</code> if the table is empty.
+     */
     public K max() {
-        if (isEmpty()) {
-            return null;
-        }
+        if (isEmpty()) return null;
         final Entry<K, V> maxEntry = entries[size - 1];
         return maxEntry.getKey();
     }
 
+    /**
+     * Removes the smallest key in the table.
+     *
+     * @return smallest key,
+     * <code>null</code> if the table is empty.
+     */
     public K removeMin() {
-        if (isEmpty()) {
-            return null;
-        }
+        if (isEmpty()) return null;
         final Entry<K, V> minEntry = removeAt(0);
         return minEntry.getKey();
     }
 
+    /**
+     * Removes the largest key in the table.
+     *
+     * @return the largest key in the table,
+     * <code>null</code> if the table is empty.
+     */
     public K removeMax() {
+        if (isEmpty()) return null;
+        final Entry<K, V> maxEntry = removeAt(size - 1);
+        return maxEntry.getKey();
+    }
+
+    public int size(K start, K end) {
+        if (!isEmpty()) {
+            // Find a key larger than or equal to the starting key.
+            final K ceil = ceil(start);
+            // Find a key less than or equal to the ending key.
+            final K floor = floor(end);
+            // If either of the found keys is null, then the range does not fit.
+            // Otherwise find their indices.
+            if (ceil != null && floor != null) {
+                final int startIndex = indexOf(ceil);
+                final int endIndex = indexOf(floor);
+                // Make sure that the start index is not larger than the end index.
+                validateRange(startIndex, endIndex);
+                return endIndex - startIndex + 1;
+            }
+        }
+        return 0;
+    }
+
+    private void validateRange(int start, int end) {
+        if (start > end) {
+            throw new IllegalArgumentException("end is less than start");
+        }
+    }
+
+    /**
+     * Returns the index of the given key.
+     * Call this method if and only if you are confident that the key is in the table.
+     * It is assumed that the key is not null and it is present in the table.
+     * Used internally for convenience.
+     *
+     * @param key whose index should be returned.
+     * @return index of the given key.
+     */
+    private int indexOf(K key) {
+        for (int start = 0, end = size - 1; start <= end; ) {
+            final int middle = start + ((end - start) >> 1);
+            final int compareResult = key.compareTo(entries[middle].getKey());
+            if      (compareResult > 0) start = middle + 1;
+            else if (compareResult < 0) end = middle - 1;
+            else return middle;
+        }
+        // This should never happen. Read the information above the method declaration.
+        return -1;
+    }
+
+    /**
+     * Returns keys in the given range [start, end].
+     * If start is larger than end, a runtime exception is thrown.
+     *
+     * @param start the start of the range.
+     * @param end the end of the range.
+     * @return an iterable collection of keys in sorted order in the range [start, end],
+     * empty list if no items were found in the range,
+     * <code>null</code> if the table is empty.
+     */
+    public Iterable<K> keys(K start, K end) {
         if (isEmpty()) {
             return null;
         }
-        final Entry<K, V> maxEntry = removeAt(--size);
-        return maxEntry.getKey();
+        final Queue<K> keys = new LinkedQueue<>();
+        final int startIndex = helperRank(start);
+        final int endIndex = helperRank(end);
+        validateRange(startIndex, endIndex);
+        for (int i = startIndex; i < endIndex; ++i) {
+            final Entry<K, V> entry = entries[i];
+            keys.enqueue(entry.getKey());
+        }
+        // It is possible not to include the largest key of the range, since the loop
+        // does not take into account the end index of the range (because it potentially can be equal to size
+        // in which an exception will be thrown).
+        // We need to make sure that we don't miss anything.
+        if (contains(end)) keys.enqueue(end);
+        return keys;
     }
 
     /**
@@ -285,9 +403,13 @@ public final class OrderedSymbolTable<K extends Comparable<K>, V> implements Sym
     private Entry<K, V> removeAt(int index) {
         final Entry<K, V> entryToRemove = entries[index];
         // Shift each entry to the left from the end up to the given index.
-        System.arraycopy(entries, index + 1, entries, index + 1 - 1, size - index + 1);
+        System.arraycopy(entries, index + 1, entries, index + 1 - 1, size - (index + 1));
         // Avoid loitering.
-        entries[size - 1] = null;
+        entries[--size] = null;
+        final int capacity = entries.length;
+        // Halve the capacity of the table if the number of keys are at least four times less than
+        // the size of the table.
+        if ((capacity >> 2) >= size) resize(capacity >> 1);
         return entryToRemove;
     }
 

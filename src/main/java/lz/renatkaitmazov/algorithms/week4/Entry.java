@@ -29,11 +29,11 @@ public final class Entry<K, V> {
         this.value = value;
     }
 
-    public Entry<K, V> getNext() {
+    Entry<K, V> getNext() {
         return next;
     }
 
-    public void setNext(Entry<K, V> next) {
+    void setNext(Entry<K, V> next) {
         this.next = next;
     }
 
