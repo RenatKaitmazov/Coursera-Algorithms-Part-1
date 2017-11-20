@@ -327,6 +327,7 @@ public final class OrderedSymbolTableTest {
 
         assertEquals(5, symbolTable.size(-100, 90));
         assertEquals(1, symbolTable.size(50, 78));
+        assertEquals(1, symbolTable.size(-15, -15));
         assertEquals(1, symbolTable.size(-19, -14));
         assertEquals(0, symbolTable.size(79, 100));
         assertEquals(0, symbolTable.size(-30, -20));

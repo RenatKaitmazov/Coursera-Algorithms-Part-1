@@ -315,25 +315,27 @@ public final class OrderedSymbolTable<K extends Comparable<K>, V> implements Sym
 
     public int size(K start, K end) {
         if (!isEmpty()) {
-            // Find a key larger than or equal to the starting key.
-            final K ceil = ceil(start);
-            // Find a key less than or equal to the ending key.
-            final K floor = floor(end);
-            // If either of the found keys is null, then the range does not fit.
-            // Otherwise find their indices.
-            if (ceil != null && floor != null) {
-                final int startIndex = indexOf(ceil);
-                final int endIndex = indexOf(floor);
-                // Make sure that the start index is not larger than the end index.
-                validateRange(startIndex, endIndex);
-                return endIndex - startIndex + 1;
-            }
+            // Make sure that the start index is not larger than the end index.
+            validateRange(start, end);
+            // Number of items less than the the starting key.
+            final int startRank = helperRank(start);
+            // Numbers of items less than the ending key plus 1 if the ending key is in the table.
+            // Rank method does not take the key itself into account, so we need to check the end key.
+            final int endRank = helperRank(end) + (contains(end) ? 1 : 0);
+            // The keys are in the range. Calculate the difference between end and start.
+            if (startRank < endRank) return endRank - startRank;
         }
         return 0;
     }
 
-    private void validateRange(int start, int end) {
-        if (start > end) {
+    /**
+     * It is assumed that the keys are not null.
+     *
+     * @param start of the range.
+     * @param end of the range.
+     */
+    private void validateRange(K start, K end) {
+        if (start.compareTo(end) > 0) {
             throw new IllegalArgumentException("end is less than start");
         }
     }
@@ -373,10 +375,10 @@ public final class OrderedSymbolTable<K extends Comparable<K>, V> implements Sym
         if (isEmpty()) {
             return null;
         }
+        validateRange(start, end);
         final Queue<K> keys = new LinkedQueue<>();
         final int startIndex = helperRank(start);
         final int endIndex = helperRank(end);
-        validateRange(startIndex, endIndex);
         for (int i = startIndex; i < endIndex; ++i) {
             final Entry<K, V> entry = entries[i];
             keys.enqueue(entry.getKey());
