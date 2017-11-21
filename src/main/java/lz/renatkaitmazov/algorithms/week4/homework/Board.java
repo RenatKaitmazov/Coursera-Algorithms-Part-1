@@ -15,7 +15,7 @@ public final class Board {
     /*--------------------------------------------------------*/
 
     private final int dimension;
-    private final int[][] blocks;
+    private final short[][] blocks;
     private final int hamming; // number of blocks out of place.
     private final int manhattan; // // sum of Manhattan distances between blocks and goal.
     private final int emptySpotRow;
@@ -35,15 +35,27 @@ public final class Board {
         emptySpotCol = rowAndColumn[1];
     }
 
-    private int[][] copy2DArray(final int[][] original) {
-        final int[][] copy = new int[dimension][dimension];
+    private short[][] copy2DArray(final int[][] original) {
+        final short[][] copy = new short[dimension][dimension];
         for (int i = 0; i < dimension; ++i) {
-            System.arraycopy(original[i], 0, copy[i], 0, dimension);
+            for (int j = 0; j < dimension; ++j) {
+                copy[i][j] = (short) original[i][j];
+            }
         }
         return copy;
     }
 
-    private int calculateHamming(final int[][] grid) {
+    private int[][] copy2DArray(final short[][] original) {
+        final int[][] copy = new int[dimension][dimension];
+        for (int i = 0; i < dimension; ++i) {
+            for (int j = 0; j < dimension; ++j) {
+                copy[i][j] = original[i][j];
+            }
+        }
+        return copy;
+    }
+
+    private int calculateHamming(final short[][] grid) {
         int count = 0;
         for (int i = 0; i < dimension; ++i) {
             for (int j = 0; j < dimension; ++j) {
@@ -57,7 +69,7 @@ public final class Board {
         return count - 1;
     }
 
-    private int calculateManhattan(final int[][] grid) {
+    private int calculateManhattan(final short[][] grid) {
         int count = 0;
         for (int i = 0; i < dimension; ++i) {
             for (int j = 0; j < dimension; ++j) {
@@ -74,7 +86,7 @@ public final class Board {
         return count;
     }
 
-    private int[] getEmptySpotRowAndColumn(final int[][] grid) {
+    private int[] getEmptySpotRowAndColumn(final short[][] grid) {
         for (int i = 0; i < dimension; ++i) {
             for (int j = 0; j < dimension; ++j) {
                 if (grid[i][j] == 0) return new int[]{i, j};
@@ -115,7 +127,7 @@ public final class Board {
     public String toString() {
         final String newLine = "\n";
         final StringBuilder builder = new StringBuilder().append(dimension).append(newLine);
-        for (final int[] row : blocks) {
+        for (final short[] row : blocks) {
             for (final int column : row) {
                 builder.append(column).append(" ");
             }
