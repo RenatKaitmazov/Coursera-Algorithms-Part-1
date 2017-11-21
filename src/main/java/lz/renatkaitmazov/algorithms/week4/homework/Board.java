@@ -2,6 +2,7 @@ package lz.renatkaitmazov.algorithms.week4.homework;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Renat Kaitmazov
@@ -13,23 +14,28 @@ public final class Board {
     /* Fields
     /*--------------------------------------------------------*/
 
-    private final byte dimension; // 2 ≤ n < 128
+    private final int dimension;
     private final int[][] blocks;
-    private final short hamming; // number of blocks out of place.
-    private final short manhattan; // // sum of Manhattan distances between blocks and goal.
+    private final int hamming; // number of blocks out of place.
+    private final int manhattan; // // sum of Manhattan distances between blocks and goal.
+    private final int emptySpotRow;
+    private final int emptySpotCol;
 
     /*--------------------------------------------------------*/
     /* Constructors
     /*--------------------------------------------------------*/
 
     public Board(int[][] grid) {
-        dimension = (byte) grid.length;
-        blocks = copyBlocks(grid, dimension);
+        dimension = grid.length;
+        blocks = copy2DArray(grid);
         hamming = calculateHamming(blocks);
         manhattan = calculateManhattan(blocks);
+        final int[] rowAndColumn = getEmptySpotRowAndColumn(blocks);
+        emptySpotRow = rowAndColumn[0];
+        emptySpotCol = rowAndColumn[1];
     }
 
-    private int[][] copyBlocks(int[][] original, int dimension) {
+    private int[][] copy2DArray(final int[][] original) {
         final int[][] copy = new int[dimension][dimension];
         for (int i = 0; i < dimension; ++i) {
             System.arraycopy(original[i], 0, copy[i], 0, dimension);
@@ -37,8 +43,8 @@ public final class Board {
         return copy;
     }
 
-    private short calculateHamming(final int[][] grid) {
-        short count = 0;
+    private int calculateHamming(final int[][] grid) {
+        int count = 0;
         for (int i = 0; i < dimension; ++i) {
             for (int j = 0; j < dimension; ++j) {
                 final int actualValue = grid[i][j];
@@ -48,11 +54,11 @@ public final class Board {
         }
         // 0 is always going to be in wrong place because it represent en empty slot, so subtract 1 from
         // the count.
-        return (short) (count - 1);
+        return count - 1;
     }
 
-    private short calculateManhattan(final int[][] grid) {
-        short count = 0;
+    private int calculateManhattan(final int[][] grid) {
+        int count = 0;
         for (int i = 0; i < dimension; ++i) {
             for (int j = 0; j < dimension; ++j) {
                 final int actualValue = grid[i][j];
@@ -66,6 +72,16 @@ public final class Board {
             }
         }
         return count;
+    }
+
+    private int[] getEmptySpotRowAndColumn(final int[][] grid) {
+        for (int i = 0; i < dimension; ++i) {
+            for (int j = 0; j < dimension; ++j) {
+                if (grid[i][j] == 0) return new int[]{i, j};
+            }
+        }
+        // It should never get to this statement, because 0 is always present in the array.
+        return new int[]{dimension - 1, dimension - 1};
     }
 
     private int expectedRow(int value) {
@@ -129,11 +145,46 @@ public final class Board {
     }
 
     public Board twin() {
-        return this;
+        final int[][] copy = copy2DArray(blocks);
+        final int row = (emptySpotRow + 1) % dimension;
+        swap(copy, row, 0, row, 1);
+        return new Board(copy);
+    }
+
+    private void swap(int[][] array, int row1, int col1, int row2, int col2) {
+        final int temp = array[row1][col1];
+        array[row1][col1] = array[row2][col2];
+        array[row2][col2] = temp;
     }
 
     public Iterable<Board> neighbors() {
-        return new LinkedList<>();
+        final List<Board> boardList = new LinkedList<>();
+
+        if (emptySpotCol < dimension - 1) {
+            final int[][] copy = copy2DArray(blocks);
+            swap(copy, emptySpotRow, emptySpotCol, emptySpotRow, emptySpotCol + 1);
+            boardList.add(new Board(copy));
+        }
+
+        if (emptySpotCol > 0) {
+            final int[][] copy = copy2DArray(blocks);
+            swap(copy, emptySpotRow, emptySpotCol - 1, emptySpotRow, emptySpotCol);
+            boardList.add(new Board(copy));
+        }
+
+        if (emptySpotRow < dimension - 1) {
+            final int[][] copy = copy2DArray(blocks);
+            swap(copy, emptySpotRow, emptySpotCol, emptySpotRow + 1, emptySpotCol);
+            boardList.add(new Board(copy));
+        }
+
+        if (emptySpotRow > 0) {
+            final int[][] copy = copy2DArray(blocks);
+            swap(copy, emptySpotRow - 1, emptySpotCol, emptySpotRow, emptySpotCol);
+            boardList.add(new Board(copy));
+        }
+
+        return boardList;
     }
 
     /*--------------------------------------------------------*/

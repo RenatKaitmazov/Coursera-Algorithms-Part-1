@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 /**
@@ -103,5 +105,38 @@ public final class BoardTest {
 
         final Board completedBoard = new Board(newBlocks);
         assertTrue(completedBoard.isGoal());
+    }
+
+    @Test
+    public void neighborsTest() {
+        final List<Board> neighbors = (List<Board>) board.neighbors();
+        assertEquals(2, neighbors.size());
+
+        final int[][] blocks1 = {
+                {1, 0, 2},
+                {3, 4, 5},
+                {6, 7, 8}
+        };
+        final Board board1 = new Board(blocks1);
+        assertTrue(neighbors.contains(board1));
+
+        final int[][] blocks2 = {
+                {1, 2, 5},
+                {3, 4, 0},
+                {6, 7, 8}
+        };
+        final Board board2 = new Board(blocks2);
+        assertTrue(neighbors.contains(board2));
+    }
+
+    @Test
+    public void twinTest() {
+        final int[][] blocks1 = {
+                {1, 0},
+                {3, 2}
+        };
+        final Board board1 = new Board(blocks1);
+        final String expected = "2\n1 0\n2 3";
+        assertEquals(expected, board1.twin().toString());
     }
 }
