@@ -2,7 +2,7 @@ package lz.renatkaitmazov.algorithms.week4.homework;
 
 import edu.princeton.cs.algs4.MinPQ;
 
-import java.util.*;
+import java.util.LinkedList;
 
 /**
  * @author Renat Kaitmazov
@@ -11,18 +11,11 @@ import java.util.*;
 public final class Solver {
 
     /*--------------------------------------------------------*/
-    /* Constants
-    /*--------------------------------------------------------*/
-
-    private static final Comparator<Board> COMPARATOR = Comparator.comparingInt(Board::hamming);
-
-    /*--------------------------------------------------------*/
     /* Fields
     /*--------------------------------------------------------*/
 
-    private final LinkedList<Board> stepsToGoal = new LinkedList<>();
+    private final LinkedList<Board> pathToGoal = new LinkedList<>();
     private boolean isSolvable = true;
-    private int steps;
 
     /*--------------------------------------------------------*/
     /* Constructors
@@ -33,29 +26,21 @@ public final class Solver {
             throw new IllegalArgumentException("board is null");
         }
 
-        try {
-            final MinPQ<Board> boardQueue = new MinPQ<>(COMPARATOR);
-            final List<Board> duplicates = new LinkedList<>();
-            Board current = initial;
-            stepsToGoal.addLast(current);
-            duplicates.add(current);
-            while (!current.isGoal()) {
-                for (final Board neighbor : current.neighbors()) {
-                    if (!duplicates.contains(neighbor)) {
-                        duplicates.add(neighbor);
-                        boardQueue.insert(neighbor);
-                    }
+        pathToGoal.add(initial);
+
+        SearchNode currentNode = new SearchNode(initial, null, 0);
+        final MinPQ<SearchNode> queueOfNodes = new MinPQ<>();
+        queueOfNodes.insert(currentNode);
+        while (!currentNode.isGoal()) {
+            currentNode = queueOfNodes.delMin();
+            final Iterable<Board> currentBoardNeighbors = currentNode.neighbors();
+            for (final Board neighbor : currentBoardNeighbors) {
+                if (!currentNode.predecessorEqualsNeighbor(neighbor)) {
+                    final Board predecessor = currentNode.current;
+                    final SearchNode nextSearchNode = new SearchNode(neighbor, predecessor, currentNode.moves + 1);
+                    queueOfNodes.insert(nextSearchNode);
                 }
-                current = boardQueue.delMin();
-                stepsToGoal.addLast(current);
-                ++steps;
             }
-            if (!duplicates.contains(current)) {
-                stepsToGoal.addLast(current);
-            }
-        } catch (NoSuchElementException e) {
-            steps = 0;
-            isSolvable = false;
         }
     }
 
@@ -68,68 +53,71 @@ public final class Solver {
     }
 
     public int moves() {
-        return steps;
+        return pathToGoal.size() - 1;
     }
 
     public Iterable<Board> solution() {
-        return stepsToGoal;
+        return pathToGoal;
+    }
+
+    /*--------------------------------------------------------*/
+    /* Nested classes
+    /*--------------------------------------------------------*/
+
+    private static final class SearchNode implements Comparable<SearchNode> {
+
+        private final Board current;
+        private final Board predecessor;
+        private final int moves;
+
+        public SearchNode(Board current, Board predecessor, int moves) {
+            this.current = current;
+            this.predecessor = predecessor;
+            this.moves = moves;
+        }
+
+        @Override
+        public int compareTo(SearchNode that) {
+            final int thisManhattan = this.current.manhattan();
+            final int thatManhattan = that.current.manhattan();
+            final int thisPriority = thisManhattan + this.moves;
+            final int thatPriority = thatManhattan + that.moves;
+            if (thisPriority < thatPriority) return -1;
+            if (thisPriority > thatPriority) return +1;
+            final int thisHamming = this.current.hamming();
+            final int thatHamming = that.current.hamming();
+            return Integer.compare(thisHamming + this.moves, thatHamming + that.moves);
+        }
+
+        public boolean predecessorEqualsNeighbor(Board neighbor) {
+            return predecessor != null && predecessor.equals(neighbor);
+        }
+
+        public boolean isGoal() {
+            return current.isGoal();
+        }
+
+        public Iterable<Board> neighbors() {
+            return current.neighbors();
+        }
+
+        @Override
+        public String toString() {
+            return String.format("moves: %d\nCurrent: %s", moves, current);
+        }
     }
 
     /*--------------------------------------------------------*/
     /* Testing
     /*--------------------------------------------------------*/
 
+    /**
+     * For debugging and testing.
+     * The assignment requires that I include the main method.
+     * Normally, I test everything using JUnit.
+     *
+     * @param args command line arguments.
+     */
     public static void main(String[] args) {
-        final int[][] blocks3x3_4 = {
-                {0, 1, 3},
-                {4, 2, 5},
-                {7, 8, 6}
-        };
-        final Solver solver1 = createSolver(blocks3x3_4);
-        assert solver1.moves() == 4;
-
-        final int[][] block2x2_0 = {
-                {1, 2},
-                {3, 0}
-        };
-        final Solver solver2 = createSolver(block2x2_0);
-        assert solver2.moves() == 0;
-
-        final int[][] block2x2_1 = {
-                {1, 2},
-                {0, 3}
-        };
-        final Solver solver3 = createSolver(block2x2_1);
-        assert solver3.moves() == 1;
-
-        final int[][] block2x2_6 = {
-                {0, 3},
-                {2, 1}
-        };
-
-        final Solver solver4 = createSolver(block2x2_6);
-        assert solver4.moves() == 6;
-
-        final int[][] block3x3_31 = {
-                {8, 6, 7},
-                {2, 5, 4},
-                {3, 0, 1}
-        };
-        final Solver solver5 = createSolver(block3x3_31);
-        assert solver5.moves() == 31;
-
-        final int[][] block4x4_80 = {
-                {0, 12, 9, 13},
-                {15, 11, 10, 14},
-                {3, 7, 5, 6},
-                {4, 8, 2, 1}
-        };
-        final Solver solver6 = createSolver(block4x4_80);
-        assert solver6.moves() == 80;
-    }
-
-    private static Solver createSolver(int[][] blocks) {
-        final Board board = new Board(blocks);
-        return new Solver(board);
     }
 }

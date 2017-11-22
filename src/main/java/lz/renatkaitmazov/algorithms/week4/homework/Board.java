@@ -92,7 +92,7 @@ public final class Board {
                 if (grid[i][j] == 0) return new int[]{i, j};
             }
         }
-        // It should never get to this statement, because 0 is always present in the array.
+        // It should never get to this statement, because 0 must always be present in the array.
         return new int[]{dimension - 1, dimension - 1};
     }
 
@@ -203,7 +203,13 @@ public final class Board {
     /* Testing
     /*--------------------------------------------------------*/
 
+    /**
+     * For debugging and testing.
+     * The assignment requires that I include the main method.
+     * Normally, I test everything using JUnit.
+     *
+     * @param args command line arguments.
+     */
     public static void main(String[] args) {
-
     }
 }
