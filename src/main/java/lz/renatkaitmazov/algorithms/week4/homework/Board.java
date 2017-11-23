@@ -172,27 +172,31 @@ public final class Board {
     public Iterable<Board> neighbors() {
         final List<Board> boardList = new LinkedList<>();
 
+        // Move empty spot up.
+        if (emptySpotRow > 0) {
+            final int[][] copy = copy2DArray(blocks);
+            swap(copy, emptySpotRow - 1, emptySpotCol, emptySpotRow, emptySpotCol);
+            boardList.add(new Board(copy));
+        }
+
+        // Move empty spot to the right.
         if (emptySpotCol < dimension - 1) {
             final int[][] copy = copy2DArray(blocks);
             swap(copy, emptySpotRow, emptySpotCol, emptySpotRow, emptySpotCol + 1);
             boardList.add(new Board(copy));
         }
 
-        if (emptySpotCol > 0) {
-            final int[][] copy = copy2DArray(blocks);
-            swap(copy, emptySpotRow, emptySpotCol - 1, emptySpotRow, emptySpotCol);
-            boardList.add(new Board(copy));
-        }
-
+        // Move empty spot row down.
         if (emptySpotRow < dimension - 1) {
             final int[][] copy = copy2DArray(blocks);
             swap(copy, emptySpotRow, emptySpotCol, emptySpotRow + 1, emptySpotCol);
             boardList.add(new Board(copy));
         }
 
-        if (emptySpotRow > 0) {
+        // Move empty spot to the left.
+        if (emptySpotCol > 0) {
             final int[][] copy = copy2DArray(blocks);
-            swap(copy, emptySpotRow - 1, emptySpotCol, emptySpotRow, emptySpotCol);
+            swap(copy, emptySpotRow, emptySpotCol - 1, emptySpotRow, emptySpotCol);
             boardList.add(new Board(copy));
         }
 
