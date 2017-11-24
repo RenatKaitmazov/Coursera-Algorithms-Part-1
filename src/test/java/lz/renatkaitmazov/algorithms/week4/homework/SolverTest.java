@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 @RunWith(JUnit4.class)
 public final class SolverTest {
 
-//    @Test
+    @Test
     public void grid3By3Move4Test() {
         final int[][] blocks = {
                 {0, 1, 3},
@@ -24,7 +24,7 @@ public final class SolverTest {
         assertEquals(4, solver.moves());
     }
 
-//    @Test
+    @Test
     public void grid2By2Move0Test() {
         final int[][] blocks = {
                 {1, 2},
@@ -34,7 +34,7 @@ public final class SolverTest {
         assertEquals(0, solver.moves());
     }
 
-//    @Test
+    @Test
     public void grid2By2Move1Test() {
         final int[][] blocks = {
                 {1, 2},
@@ -44,7 +44,7 @@ public final class SolverTest {
         assertEquals(1, solver.moves());
     }
 
-//    @Test
+    @Test
     public void grid2By2Move6Test() {
         final int[][] blocks = {
                 {0, 3},
@@ -87,7 +87,7 @@ public final class SolverTest {
         assertEquals(15, solver.moves());
     }
 
-//    @Test
+    @Test
     public void grid3By3Move31Test() {
         final int[][] blocks = {
                 {8, 6, 7},
