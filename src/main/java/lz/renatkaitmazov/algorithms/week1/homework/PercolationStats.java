@@ -1,5 +1,7 @@
 package lz.renatkaitmazov.algorithms.week1.homework;
 
+import edu.princeton.cs.algs4.StdStats;
+
 /**
  * @author Renat Kaitmazov
  */

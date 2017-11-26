@@ -1,6 +1,5 @@
 package lz.renatkaitmazov.algorithms.week1.homework;
 
-
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 /**
@@ -9,39 +8,30 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public final class Percolation {
 
-    private static final int CODE_BLOCKED = -1;
+    /*--------------------------------------------------------*/
+    /* Fields
+    /*--------------------------------------------------------*/
 
-
+    private final int virtualTopId;
+    private final int virtualBottomId;
     private final WeightedQuickUnionUF quickUnion;
-
-    private final int[][] grid;
-
+    private final boolean[][] grid;
     private final int size;
+    private int openSites;
 
-    private int openedSites;
+    /*--------------------------------------------------------*/
+    /* Constructors
+    /*--------------------------------------------------------*/
 
     public Percolation(int n) {
         if (n < 1) {
-            final String msg = String.format("Size must be positive. Your is: %d", n);
-            throw new IllegalArgumentException(msg);
+            throw new IllegalArgumentException("n is not positive");
         }
-
+        virtualTopId = 0;
+        virtualBottomId = n * n + 1;
         size = n;
-
-        grid = new int[n][n];
-        // Set all entries to -1.
-        // It means they are blocked.
-        initGrid(grid, n);
-
-        // Two additional sites: one for the top site, the other for the bottom one.
-        final int quickUnionSize = n * n + 2;
-        quickUnion = new WeightedQuickUnionUF(quickUnionSize);
-        // Connect to the top virtual site.
-        final int topSiteId = 0;
-        connectRowToVirtualSite(1, topSiteId);
-        // Connect to the bottom virtual site.
-        final int bottomSiteId = quickUnionSize - 1;
-        connectRowToVirtualSite(size, bottomSiteId);
+        grid = new boolean[n][n];
+        quickUnion = new WeightedQuickUnionUF(n * n + 2);
     }
 
     /*--------------------------------------------------------*/
@@ -49,116 +39,66 @@ public final class Percolation {
     /*--------------------------------------------------------*/
 
     public void open(int row, int col) {
-        validate(row, col);
-        if (!isOpen(row, col)) {
-            final int siteIndex = index(row, col);
-            set(row, col, siteIndex);
-            ++openedSites;
+        if (isOpen(row, col)) return;
+        grid[row - 1][col - 1] = true;
+        ++openSites;
 
-            if (isRightNeighborOpened(row, col)) {
-                quickUnion.union(siteIndex, index(row, col + 1));
-            }
+        // Transform the row and the column into an appropriate index
+        // because the quick union class uses a one-dimensional array.
+        final int currentSiteIndex = toIndex(row, col);
 
-            if (isLeftNeighborOpened(row, col)) {
-                quickUnion.union(siteIndex, index(row, col - 1));
-            }
+        // The topmost row must be connected to the virtual top.
+        if (row == 1)       quickUnion.union(virtualTopId, currentSiteIndex);
+        // The bottommost row must be connected to virtual the bottom.
+        if (row == size)    quickUnion.union(virtualBottomId, currentSiteIndex);
 
-            if (isTopNeighborOpened(row, col)) {
-                quickUnion.union(siteIndex, index(row - 1, col));
-            }
-
-            if (isBottomNeighborOpened(row, col)) {
-                quickUnion.union(siteIndex, index(row + 1, col));
-            }
-        }
+        // Connect all neighbors of the current site if and only if the neighbors are open.
+        if (row > 1     && isOpen(row - 1, col)) quickUnion.union(toIndex(row - 1, col), currentSiteIndex); // Top neighbor.
+        if (row < size  && isOpen(row + 1, col)) quickUnion.union(toIndex(row + 1, col), currentSiteIndex); // Bottom neighbor.
+        if (col > 1     && isOpen(row, col - 1)) quickUnion.union(toIndex(row, col - 1), currentSiteIndex); // Left neighbor.
+        if (col < size  && isOpen(row, col + 1)) quickUnion.union(toIndex(row, col + 1), currentSiteIndex); // Right neighbor.
     }
-
-    private boolean isRightNeighborOpened(int row, int col) {
-        if (col + 1 > size) return false;
-        return isOpen(row, col + 1);
-    }
-
-    private boolean isLeftNeighborOpened(int row, int col) {
-        if (col - 1 < 1) return false;
-        return isOpen(row, col - 1);
-    }
-
-    private boolean isTopNeighborOpened(int row, int col) {
-        if (row - 1 < 1) return false;
-        return isOpen(row - 1, col);
-    }
-
-    private boolean isBottomNeighborOpened(int row, int col) {
-        if (row + 1 > size) return false;
-        return isOpen(row + 1, col);
-    }
-
 
     public boolean isOpen(int row, int col) {
-        validate(row, col);
-        return grid[row - 1][col - 1] > CODE_BLOCKED;
+        validateRowAndColumn(row, col);
+        return grid[row - 1][col - 1];
     }
 
     public boolean isFull(int row, int col) {
-        validate(row, col);
-        final int topSiteId = 0;
-        final int index = index(row, col);
-        return quickUnion.connected(topSiteId, index);
+        validateRowAndColumn(row, col);
+        // A site is considered to be full if and only if it is connected to the top
+        // but not to the bottom to avoid backwash bug.
+        return quickUnion.connected(virtualTopId, toIndex(row, col));
     }
 
     public int numberOfOpenSites() {
-        return openedSites;
+        return openSites;
     }
 
     public boolean percolates() {
-        final int topId = 0;
-        final int bottomId = size * size + 1;
-        return quickUnion.connected(topId, bottomId);
+        // If the top virtual site is connected to the bottom virtual site,
+        // the system percolates.
+        return quickUnion.connected(virtualTopId, virtualBottomId);
     }
 
     /*--------------------------------------------------------*/
     /* Helper methods
     /*--------------------------------------------------------*/
 
-    private void initGrid(final int[][] grid, int size) {
-        for (int row = 0; row < size; ++row) {
-            for (int col = 0; col < size; ++col) {
-                grid[row][col] = CODE_BLOCKED;
-            }
+    private void validateRowAndColumn(int row, int col) {
+        // row or column must be in range [1, N]
+        if ((row < 1 || row > size) || (col < 1 || col > size)) {
+            throw new IllegalArgumentException("wrong row or column");
         }
     }
 
-    private void connectRowToVirtualSite(int row, int virtualSiteId) {
-        for (int col = 1; col <= size; ++col) {
-            final int index = index(row, col);
-            quickUnion.union(virtualSiteId, index);
-        }
-    }
-
-    private void validate(int row, int column) {
-        if ((row < 1 || row > size) || (column < 1 || column > size)) {
-            throw new IllegalArgumentException();
-        }
-    }
-
-    private void set(int row, int col, int value) {
-        grid[row - 1][col - 1] = value;
-    }
-
-    private int index(int row, int col) {
-        final int actualRow = row - 1;
-        final int actualCol = col - 1;
-        return (actualRow * size) + actualCol;
+    private int toIndex(int row, int col) {
+        final int r = row - 1;
+        final int c = col - 1;
+        return (size * r) + c + 1;
     }
 
     public static void main(String[] args) {
-        final Percolation percolation = new Percolation(5);
-        percolation.open(1, 1);
-        percolation.open(2, 1);
-        percolation.open(3, 1);
-        percolation.open(4, 1);
-        percolation.open(5, 1);
-        System.out.println(percolation.isOpen(1, 1));
-        System.out.println(percolation.percolates());
+        InteractivePercolationVisualizer.main(args);
     }
 }

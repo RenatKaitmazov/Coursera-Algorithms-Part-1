@@ -1,6 +1,8 @@
 package lz.renatkaitmazov.algorithms.week4.homework;
 
+import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
+import edu.princeton.cs.algs4.StdOut;
 
 import java.util.LinkedList;
 
@@ -42,8 +44,6 @@ public final class Solver {
 
         // The start of the path to the goal is always the board we are given.
         visitedNodes.add(solvableNode);
-//        path.add(solvable);
-
         for (;;) {
             if (unsolvableNode.isGoal()) {
                 // The assumption was wrong.
@@ -68,10 +68,10 @@ public final class Solver {
             // from the last added node up to the initial node following the chain of predecessors.
             visitedNodes.addFirst(solvableNode);
         }
-        resolvePath(visitedNodes);
+        determinePath(visitedNodes);
     }
 
-    private void resolvePath(LinkedList<Node> visitedStackOfNodes) {
+    private void determinePath(LinkedList<Node> visitedStackOfNodes) {
         // Start finding the path from the last added node.
         Node current = visitedStackOfNodes.removeFirst();
         path.addFirst(current.current);
@@ -159,5 +159,23 @@ public final class Solver {
      * @param args command line arguments.
      */
     public static void main(String[] args) {
+        final String path = "src/main/java/lz/renatkaitmazov/algorithms/week4/homework/";
+        final String filename = "puzzle.txt";
+        final In in = new In(path + filename);
+        final int n = in.readInt();
+        final int[][] tiles = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                tiles[i][j] = in.readInt();
+            }
+        }
+
+        // solve the slider puzzle
+        final Board initial = new Board(tiles);
+        final Solver solver = new Solver(initial);
+        StdOut.println(filename + ": " + solver.moves());
+        for (final Board board : solver.path) {
+            System.out.println(board);
+        }
     }
 }
