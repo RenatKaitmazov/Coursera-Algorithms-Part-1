@@ -87,7 +87,6 @@ public final class PercolationTest {
     @Test
     public void percolatesTest1() {
         percolation.open(4, 4);
-        percolation.open(4, 4);
         percolation.open(3, 4);
         percolation.open(2, 4);
         percolation.open(1, 4);
@@ -114,5 +113,27 @@ public final class PercolationTest {
         percolation.open(2, 3);
         assertTrue(percolation.isFull(3, 2));
         assertTrue(percolation.percolates());
+    }
+
+    @Test
+    public void backwashTest1() {
+        percolation.open(4, 4);
+        percolation.open(3, 4);
+        percolation.open(2, 4);
+        percolation.open(1, 4);
+        assertTrue(percolation.percolates());
+        percolation.open(4, 1);
+        assertFalse(percolation.isFull(4, 1));
+    }
+
+    @Test
+    public void backwashTest2() {
+        percolation.open(4, 1);
+        percolation.open(4, 4);
+        percolation.open(3, 4);
+        percolation.open(2, 4);
+        percolation.open(1, 4);
+        assertTrue(percolation.percolates());
+        assertFalse(percolation.isFull(4, 1));
     }
 }

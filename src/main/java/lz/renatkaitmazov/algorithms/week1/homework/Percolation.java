@@ -14,7 +14,8 @@ public final class Percolation {
 
     private final int virtualTopId;
     private final int virtualBottomId;
-    private final WeightedQuickUnionUF quickUnion;
+    private final WeightedQuickUnionUF mainUnion;
+    private final WeightedQuickUnionUF backwashAwareUnion;
     private final boolean[][] grid;
     private final int size;
     private int openSites;
@@ -31,7 +32,8 @@ public final class Percolation {
         virtualBottomId = n * n + 1;
         size = n;
         grid = new boolean[n][n];
-        quickUnion = new WeightedQuickUnionUF(n * n + 2);
+        mainUnion = new WeightedQuickUnionUF(n * n + 2);
+        backwashAwareUnion = new WeightedQuickUnionUF(n * n + 2);
     }
 
     /*--------------------------------------------------------*/
@@ -48,15 +50,37 @@ public final class Percolation {
         final int currentSiteIndex = toIndex(row, col);
 
         // The topmost row must be connected to the virtual top.
-        if (row == 1)       quickUnion.union(virtualTopId, currentSiteIndex);
+        if (row == 1) {
+            mainUnion.union(virtualTopId, currentSiteIndex);
+            backwashAwareUnion.union(virtualTopId, currentSiteIndex);
+        }
         // The bottommost row must be connected to virtual the bottom.
-        if (row == size)    quickUnion.union(virtualBottomId, currentSiteIndex);
+        if (row == size) mainUnion.union(virtualBottomId, currentSiteIndex);
 
         // Connect all neighbors of the current site if and only if the neighbors are open.
-        if (row > 1     && isOpen(row - 1, col)) quickUnion.union(toIndex(row - 1, col), currentSiteIndex); // Top neighbor.
-        if (row < size  && isOpen(row + 1, col)) quickUnion.union(toIndex(row + 1, col), currentSiteIndex); // Bottom neighbor.
-        if (col > 1     && isOpen(row, col - 1)) quickUnion.union(toIndex(row, col - 1), currentSiteIndex); // Left neighbor.
-        if (col < size  && isOpen(row, col + 1)) quickUnion.union(toIndex(row, col + 1), currentSiteIndex); // Right neighbor.
+        if (row > 1 && isOpen(row - 1, col)) {
+            final int topNeighborIndex = toIndex(row - 1, col);
+            mainUnion.union(topNeighborIndex, currentSiteIndex);
+            backwashAwareUnion.union(topNeighborIndex, currentSiteIndex);
+        }
+
+        if (row < size && isOpen(row + 1, col)) {
+            final int bottomNeighborIndex = toIndex(row + 1, col);
+            mainUnion.union(bottomNeighborIndex, currentSiteIndex);
+            backwashAwareUnion.union(bottomNeighborIndex, currentSiteIndex);
+        }
+
+        if (col > 1 && isOpen(row, col - 1)) {
+            final int leftNeighborIndex = toIndex(row, col - 1);
+            mainUnion.union(leftNeighborIndex, currentSiteIndex);
+            backwashAwareUnion.union(leftNeighborIndex, currentSiteIndex);
+        }
+
+        if (col < size && isOpen(row, col + 1)) {
+            final int rightNeighborIndex = toIndex(row, col + 1);
+            mainUnion.union(rightNeighborIndex, currentSiteIndex);
+            backwashAwareUnion.union(rightNeighborIndex, currentSiteIndex);
+        }
     }
 
     public boolean isOpen(int row, int col) {
@@ -68,7 +92,9 @@ public final class Percolation {
         validateRowAndColumn(row, col);
         // A site is considered to be full if and only if it is connected to the top
         // but not to the bottom to avoid backwash bug.
-        return quickUnion.connected(virtualTopId, toIndex(row, col));
+        final int siteIndex = toIndex(row, col);
+        return backwashAwareUnion.connected(virtualTopId, siteIndex)
+                && mainUnion.connected(virtualTopId, siteIndex);
     }
 
     public int numberOfOpenSites() {
@@ -78,7 +104,7 @@ public final class Percolation {
     public boolean percolates() {
         // If the top virtual site is connected to the bottom virtual site,
         // the system percolates.
-        return quickUnion.connected(virtualTopId, virtualBottomId);
+        return mainUnion.connected(virtualTopId, virtualBottomId);
     }
 
     /*--------------------------------------------------------*/
@@ -99,6 +125,8 @@ public final class Percolation {
     }
 
     public static void main(String[] args) {
-        InteractivePercolationVisualizer.main(args);
+        final String path = "src/main/java/lz/renatkaitmazov/algorithms/week1/homework/";
+        final String fileName = "percolation.txt";
+        PercolationVisualizer.main(new String[]{path + fileName});
     }
 }
