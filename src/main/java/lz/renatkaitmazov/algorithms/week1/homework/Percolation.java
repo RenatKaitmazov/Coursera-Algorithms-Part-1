@@ -25,15 +25,14 @@ public final class Percolation {
     /*--------------------------------------------------------*/
 
     public Percolation(int n) {
-        if (n < 1) {
-            throw new IllegalArgumentException("n is not positive");
-        }
+        if (n < 1) throw new IllegalArgumentException("n is not positive");
         virtualTopId = 0;
         virtualBottomId = n * n + 1;
         size = n;
         grid = new boolean[n][n];
-        mainUnion = new WeightedQuickUnionUF(n * n + 2);
-        backwashAwareUnion = new WeightedQuickUnionUF(n * n + 2);
+        final int componentAmount = n * n + 2;
+        mainUnion = new WeightedQuickUnionUF(componentAmount);
+        backwashAwareUnion = new WeightedQuickUnionUF(componentAmount);
     }
 
     /*--------------------------------------------------------*/
@@ -92,9 +91,7 @@ public final class Percolation {
         validateRowAndColumn(row, col);
         // A site is considered to be full if and only if it is connected to the top
         // but not to the bottom to avoid backwash bug.
-        final int siteIndex = toIndex(row, col);
-        return backwashAwareUnion.connected(virtualTopId, siteIndex)
-                && mainUnion.connected(virtualTopId, siteIndex);
+        return backwashAwareUnion.connected(virtualTopId, toIndex(row, col));
     }
 
     public int numberOfOpenSites() {
