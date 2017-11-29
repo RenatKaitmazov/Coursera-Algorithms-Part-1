@@ -229,7 +229,7 @@ public final class OrderedSymbolTable<K extends Comparable<K>, V> implements Sym
     }
 
     /**
-     * Returns the smallest greater than or equal to the given key.
+     * Returns the smallest key greater than or equal to the given key.
      *
      * @param key a key.
      * @return the largest key <code>>= key</code>,
