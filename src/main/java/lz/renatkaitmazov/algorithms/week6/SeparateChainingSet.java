@@ -37,7 +37,9 @@ public final class SeparateChainingSet<T> implements Set<T> {
 
     @SuppressWarnings("unchecked")
     public SeparateChainingSet(int capacity) {
-        validateCapacity(capacity);
+        if (capacity < 1) {
+            throw new IllegalArgumentException("Capacity must be positive");
+        }
         set = (LinkedList<T>[]) new LinkedList[capacity];
     }
 
@@ -137,12 +139,6 @@ public final class SeparateChainingSet<T> implements Set<T> {
     /*--------------------------------------------------------*/
     /* Helper methods
     /*--------------------------------------------------------*/
-
-    private void validateCapacity(int capacity) {
-        if (capacity < 1) {
-            throw new IllegalArgumentException("Capacity must be positive");
-        }
-    }
 
     private void resize(int newSize) {
         @SuppressWarnings("unchecked")

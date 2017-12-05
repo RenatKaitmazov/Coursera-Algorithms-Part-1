@@ -52,6 +52,9 @@ public abstract class ConnectedComponent {
     /*--------------------------------------------------------*/
 
     public ConnectedComponent(int numberOfComponents) {
+        if (numberOfComponents < 1) {
+            throw new IllegalArgumentException("Number of components must be positive");
+        }
         this.numberOfComponents = numberOfComponents;
         elements = new int[numberOfComponents];
         initElements(elements, numberOfComponents);

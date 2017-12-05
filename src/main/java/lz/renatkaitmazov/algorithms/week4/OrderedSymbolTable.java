@@ -46,6 +46,9 @@ public final class OrderedSymbolTable<K extends Comparable<K>, V> implements Sym
 
     @SuppressWarnings("unchecked")
     public OrderedSymbolTable(int capacity) {
+        if (capacity < 1) {
+            throw new IllegalArgumentException("Capacity must be positive");
+        }
         entries = (Entry<K, V>[]) new Entry[capacity];
     }
 

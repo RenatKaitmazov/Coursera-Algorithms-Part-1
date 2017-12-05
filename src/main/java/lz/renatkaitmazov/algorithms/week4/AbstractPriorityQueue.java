@@ -38,6 +38,9 @@ public abstract class AbstractPriorityQueue<T extends Comparable<T>> implements 
 
     @SuppressWarnings("unchecked")
     public AbstractPriorityQueue(int capacity, Comparator<T> comparator) {
+        if (capacity < 1) {
+            throw new IllegalArgumentException("Capacity must be positive");
+        }
         this.comparator = comparator;
         items = (T[]) new Comparable[capacity];
     }

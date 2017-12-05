@@ -51,8 +51,8 @@ public final class ArrayStack<T> implements Stack<T> {
 
     @SuppressWarnings("unchecked")
     public ArrayStack(int capacity) {
-        if (capacity < 0) {
-            throw new IllegalArgumentException("Capacity cannot be negative");
+        if (capacity < 1) {
+            throw new IllegalArgumentException("Capacity must be positive");
         }
         items = (T[]) new Object[capacity];
     }
