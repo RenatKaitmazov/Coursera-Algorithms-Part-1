@@ -73,16 +73,14 @@ public final class LinearProbingSet<T> implements Set<T> {
 
     @Override
     public T get(T item) {
-        if (item != null && !isEmpty()) {
+        if (item != null) {
             final int capacity = set.length;
             int itemIndex = hash(item, capacity);
             Node<T> node = set[itemIndex];
-            if (node != null && !node.isRemoved) {
-                while (node != null) {
-                    if (item.equals(node.item)) return item;
-                    itemIndex = (itemIndex + 1) % capacity;
-                    node = set[itemIndex];
-                }
+            while (node != null && !node.isRemoved) {
+                if (item.equals(node.item)) return item;
+                itemIndex = (itemIndex + 1) % capacity;
+                node = set[itemIndex];
             }
         }
         return null;
@@ -108,12 +106,12 @@ public final class LinearProbingSet<T> implements Set<T> {
 
     @Override
     public T remove(T item) {
-        if (item != null && !isEmpty()) {
+        if (item != null) {
             final int capacity = set.length;
             int itemIndex = hash(item, capacity);
             Node<T> node = set[itemIndex];
-            while (node != null) {
-                if (!node.isRemoved && item.equals(node.item)) {
+            while (node != null && !node.isRemoved ) {
+                if (item.equals(node.item)) {
                     node.isRemoved = true;
                     --size;
                     if ((capacity >> 3) > size) resize(capacity >> 1);

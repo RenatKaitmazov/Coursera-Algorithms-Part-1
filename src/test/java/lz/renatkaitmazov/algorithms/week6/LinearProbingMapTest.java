@@ -17,15 +17,15 @@ import static org.junit.Assert.*;
  */
 
 @RunWith(JUnit4.class)
-public final class SeparateChainingMapTest {
+public final class LinearProbingMapTest {
 
     private final int capacity = 5;
     private final String[] numbers = {"One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"};
-    private SeparateChainingMap<String, Integer> map;
+    private LinearProbingMap<String, Integer> map;
 
     @Before
     public void setUp() {
-        map = new SeparateChainingMap<>(capacity);
+        map = new LinearProbingMap<>(capacity);
     }
 
     @After
@@ -54,6 +54,16 @@ public final class SeparateChainingMapTest {
     }
 
     @Test
+    public void addTest3() {
+        map.put("Ten", 10);
+        map.remove("Ten");
+        map.put("Ten", 10);
+        assertEquals(1, map.size());
+        assertTrue(map.contains("Ten"));
+        assertEquals("[{Ten:10}]", map.toString());
+    }
+
+    @Test
     public void noDuplicatesTest() {
         map.put("One", 1);
         map.put("One", 1);
@@ -78,7 +88,7 @@ public final class SeparateChainingMapTest {
         map.put("args", 6);
         map.put("public", -1);
         assertEquals(6, map.size());
-        assertEquals(10, map.getCapacity());
+        assertEquals(20, map.getCapacity());
         assertEquals(Integer.valueOf(-1), map.get("public"));
         assertNull(map.get("One"));
         assertEquals(Integer.valueOf(2), map.get("static"));
@@ -105,27 +115,26 @@ public final class SeparateChainingMapTest {
 
     @Test
     public void removeTest() {
-        assertNull(map.remove("Hi"));
         map.put("Android", 1);
         map.put("Android", null);
         assertTrue(map.isEmpty());
         assertEquals(2, map.getCapacity());
 
-        map.put("iOS", 2);
-        map.put("macOSX", 3); // Capacity = 4
-        map.put("Windows", 4); // Capacity = 8
-        map.put("Linux", 5);
+        map.put("iOS", 2); // Capacity = 4
+        map.put("macOSX", 3); // Capacity = 8
+        map.put("Windows", 4);
+        map.put("Linux", 5); // Capacity = 16
         map.put("Symbian", 6);
-        assertEquals(8, map.getCapacity());
+        assertEquals(16, map.getCapacity());
 
         assertNull(map.remove("FreeBSD"));
 
         assertEquals(Integer.valueOf(3), map.remove("macOSX"));
         assertEquals(Integer.valueOf(6), map.remove("Symbian"));
-        assertEquals(Integer.valueOf(2), map.remove("iOS")); // Capacity = 4
+        assertEquals(Integer.valueOf(2), map.remove("iOS")); // Capacity = 8
         assertEquals(Integer.valueOf(4), map.remove("Windows"));
         assertEquals(Integer.valueOf(5), map.remove("Linux"));
         assertTrue(map.isEmpty());
-        assertEquals(1, map.getCapacity());
+        assertEquals(2, map.getCapacity());
     }
 }

@@ -120,7 +120,6 @@ public final class SeparateChainingMap<K, V> implements Map<K, V> {
     @Override
     public V remove(K key) {
         validateNotNull(key);
-        if (isEmpty()) return null;
         final int capacity = map.length;
         final int keyIndex = hash(key, capacity);
         final List<Entry<K, V>> chain = map[keyIndex];
