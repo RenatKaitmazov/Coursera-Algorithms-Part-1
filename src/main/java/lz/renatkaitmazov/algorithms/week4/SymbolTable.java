@@ -34,7 +34,7 @@ public interface SymbolTable<K, V> {
      * Puts the given value paired with the key into the table.
      * If the value is <code>null</code>, removes the key from the table.
      * Throws a runtime exception if the key is <code>null</code>.
-     * If the key is already in the table, it updates paired with the key.
+     * If the key is already in the table, it updates the value paired with the key.
      *
      * @param key   a key
      * @param value associated with the key
@@ -46,7 +46,7 @@ public interface SymbolTable<K, V> {
      *
      * @param key to remove.
      * @return value, paired with the key,
-     * <code>null</code> if the key was absent.
+     * <code>null</code> if the key was absent or if the table is empty.
      */
     V remove(K key);
 

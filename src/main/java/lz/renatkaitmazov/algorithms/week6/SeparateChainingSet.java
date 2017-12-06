@@ -99,13 +99,13 @@ public final class SeparateChainingSet<T> implements Set<T> {
             if (size >= capacity * LOAD_FACTOR) resize(capacity << 1);
             // Generate a hash value (effectively it is an array index at which the item will be stored).
             final int itemIndex = hash(item, set.length);
-            List<T> chain = set[itemIndex];
-            if (chain == null) chain = new LinkedList<>();
+            if (set[itemIndex] == null) set[itemIndex] = new LinkedList<>();
+            final List<T> chain = set[itemIndex];
             // A set does not allow for duplicates.
-            if (chain.contains(item)) return;
-            chain.append(item);
-            set[itemIndex] = chain;
-            ++size;
+            if (!chain.contains(item)) {
+                chain.append(item);
+                ++size;
+            }
         }
     }
 
@@ -119,7 +119,7 @@ public final class SeparateChainingSet<T> implements Set<T> {
                 final T itemToRemove = chain.remove(item);
                 if (itemToRemove != null) {
                     --size;
-                    if ((capacity >> 2) >= size) resize(capacity >> 1);
+                    if (capacity >> 2 >= size) resize(capacity >> 1);
                     return itemToRemove;
                 }
             }
@@ -151,10 +151,8 @@ public final class SeparateChainingSet<T> implements Set<T> {
                 for (final T item : chain) {
                     // Recalculate a hash value relative to the new size.
                     final int newItemIndex = hash(item, newSize);
-                    List<T> newChain = newSet[newItemIndex];
-                    if (newChain == null) newChain = new LinkedList<>();
-                    newChain.append(item);
-                    newSet[newItemIndex] = newChain;
+                    if (newSet[newItemIndex] == null) newSet[newItemIndex] = new LinkedList<>();
+                    newSet[newItemIndex].append(item);
                 }
             }
         }

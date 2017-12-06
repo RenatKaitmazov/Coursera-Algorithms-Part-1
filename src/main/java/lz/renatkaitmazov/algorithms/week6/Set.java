@@ -7,7 +7,7 @@ package lz.renatkaitmazov.algorithms.week6;
  * A class that is going to be stored in a set must override
  * the {@link #hashCode()} and the {@link #equals(Object)} methods
  * because the data structure relies on them. Otherwise
- * there won't be guarantees the the set stores unique values.
+ * there won't be guarantees that the set stores unique values.
  * Null values are not allowed to be added.
  *
  * @author Renat Kaitmazov

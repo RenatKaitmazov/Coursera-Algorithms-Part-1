@@ -3,6 +3,8 @@ package lz.renatkaitmazov.algorithms.week6;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.util.*;
 
@@ -12,7 +14,8 @@ import static org.junit.Assert.*;
  * @author Renat Kaitmazov
  */
 
-public class SeparateChainingSetTest {
+@RunWith(JUnit4.class)
+public final class SeparateChainingSetTest {
 
     private SeparateChainingSet<Integer> set;
     private int capacity = 4;
