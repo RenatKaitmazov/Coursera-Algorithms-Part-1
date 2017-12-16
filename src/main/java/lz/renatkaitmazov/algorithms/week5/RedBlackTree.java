@@ -6,7 +6,8 @@ import lz.renatkaitmazov.algorithms.week4.SearchTree;
 
 import java.util.Comparator;
 
-import static lz.renatkaitmazov.algorithms.week5.RedBlackTree.Node.*;
+import static lz.renatkaitmazov.algorithms.week5.RedBlackTree.Node.BLACK;
+import static lz.renatkaitmazov.algorithms.week5.RedBlackTree.Node.RED;
 
 /**
  * A concrete implementation of the search tree.
@@ -81,7 +82,7 @@ public final class RedBlackTree<T extends Comparable<T>> implements SearchTree<T
 
     @Override
     public int size() {
-        return Node.size(root);
+        return size(root);
     }
 
     @Override
@@ -189,6 +190,42 @@ public final class RedBlackTree<T extends Comparable<T>> implements SearchTree<T
     /* Helper methods
     /*--------------------------------------------------------*/
 
+    private static boolean isRed(Node x) {
+        return x != null && x.color == RED;
+    }
+
+    private static <T extends Comparable<T>> Node<T> rotateLeft(Node<T> node) {
+        final Node<T> rightChild = node.right;
+        node.right = rightChild.left;
+        rightChild.left = node;
+        rightChild.color = node.color;
+        node.color = RED;
+        rightChild.size = node.size;
+        node.size = 1 + size(node.left) + size(node.right);
+        return rightChild;
+    }
+
+    private static <T extends Comparable<T>> Node<T> rotateRight(Node<T> node) {
+        final Node<T> leftChild = node.left;
+        node.left = leftChild.right;
+        leftChild.right = node;
+        leftChild.color = node.color;
+        node.color = RED;
+        leftChild.size = node.size;
+        node.size = 1 + size(node.left) + size(node.right);
+        return leftChild;
+    }
+
+    private static <T extends Comparable<T>> void flipColors(Node<T> node) {
+        node.color = RED;
+        node.left.color = BLACK;
+        node.right.color = BLACK;
+    }
+
+    private static <T extends Comparable<T>> int size(Node<T> node) {
+        return node != null ? node.size : 0;
+    }
+
     private void validateNotNull(T item) {
         if (item == null) {
             throw new IllegalArgumentException("Item cannot be null");
@@ -218,7 +255,7 @@ public final class RedBlackTree<T extends Comparable<T>> implements SearchTree<T
         if (isRed(node.left) && isRed(node.left.left)) node = rotateRight(node);
         // If both children are red, flip their color with the node.
         if (isRed(node.left) && isRed(node.right)) flipColors(node);
-        node.size = 1 + Node.size(node.left) + Node.size(node.right);
+        node.size = 1 + size(node.left) + size(node.right);
         return node;
     }
 
@@ -315,14 +352,14 @@ public final class RedBlackTree<T extends Comparable<T>> implements SearchTree<T
     private int rank(Node<T> node, T item) {
         if (node == null) return 0;
         final int compareResult = comparator.compare(item, node.item);
-        final int rank = Node.size(node.left);
+        final int rank = size(node.left);
         if (compareResult < 0) return rank(node.left, item);
         if (compareResult > 0) return 1 + rank + rank(node.right, item);
         return rank;
     }
 
     private Node<T> select(Node<T> node, int index) {
-        final int nodeIndex = Node.size(node.left);
+        final int nodeIndex = size(node.left);
         if (index < nodeIndex) return select(node.left, index);
         if (index > nodeIndex) return select(node.right, index - nodeIndex - 1);
         return node;
@@ -408,42 +445,6 @@ public final class RedBlackTree<T extends Comparable<T>> implements SearchTree<T
         @Override
         public int hashCode() {
             return item.hashCode();
-        }
-
-        static boolean isRed(Node x) {
-            return x != null && x.color == RED;
-        }
-
-        static <T extends Comparable<T>> Node<T> rotateLeft(Node<T> node) {
-            final Node<T> rightChild = node.right;
-            node.right = rightChild.left;
-            rightChild.left = node;
-            rightChild.color = node.color;
-            node.color = RED;
-            rightChild.size = node.size;
-            node.size = 1 + size(node.left) + size(node.right);
-            return rightChild;
-        }
-
-        static <T extends Comparable<T>> Node<T> rotateRight(Node<T> node) {
-            final Node<T> leftChild = node.left;
-            node.left = leftChild.right;
-            leftChild.right = node;
-            leftChild.color = node.color;
-            node.color = RED;
-            leftChild.size = node.size;
-            node.size = 1 + size(node.left) + size(node.right);
-            return leftChild;
-        }
-
-        static <T extends Comparable<T>> void flipColors(Node<T> node) {
-            node.color = RED;
-            node.left.color = BLACK;
-            node.right.color = BLACK;
-        }
-
-        static <T extends Comparable<T>> int size(Node<T> node) {
-            return node != null ? node.size : 0;
         }
     }
 }
