@@ -156,6 +156,10 @@ public final class RedBlackTree<T extends Comparable<T>> implements SearchTree<T
 
     @Override
     public T deleteMin() {
+        if (isEmpty()) return null;
+//        final Pair<T, Node<T>> pair = deleteMin(root);
+//        root = pair.node;
+//        return pair.item;
         return null;
     }
 
@@ -166,6 +170,7 @@ public final class RedBlackTree<T extends Comparable<T>> implements SearchTree<T
 
     @Override
     public T delete(T item) {
+        validateNotNull(item);
         return null;
     }
 
@@ -217,9 +222,9 @@ public final class RedBlackTree<T extends Comparable<T>> implements SearchTree<T
     }
 
     private static <T extends Comparable<T>> void flipColors(Node<T> node) {
-        node.color = RED;
-        node.left.color = BLACK;
-        node.right.color = BLACK;
+        node.color = !node.color;
+        node.left.color = !node.left.color;
+        node.right.color = !node.right.color;
     }
 
     private static <T extends Comparable<T>> int size(Node<T> node) {
@@ -253,7 +258,7 @@ public final class RedBlackTree<T extends Comparable<T>> implements SearchTree<T
         if (isRed(node.right) && !isRed(node.left)) node = rotateLeft(node);
         // Two consecutive red nodes are not allowed. Rotate the node to the right to keep the invariant.
         if (isRed(node.left) && isRed(node.left.left)) node = rotateRight(node);
-        // If both children are red, flip their color with the node.
+        // If both children are red, flip their colors.
         if (isRed(node.left) && isRed(node.right)) flipColors(node);
         node.size = 1 + size(node.left) + size(node.right);
         return node;
@@ -365,6 +370,11 @@ public final class RedBlackTree<T extends Comparable<T>> implements SearchTree<T
         return node;
     }
 
+//    private Pair<T, Node<T>> deleteMin(Node<T> node) {
+//        if (node.left == null) return new Pair<>();
+//
+//    }
+
     /*--------------------------------------------------------*/
     /* Testing
     /*--------------------------------------------------------*/
@@ -445,6 +455,16 @@ public final class RedBlackTree<T extends Comparable<T>> implements SearchTree<T
         @Override
         public int hashCode() {
             return item.hashCode();
+        }
+    }
+
+    private static final class Pair<T1, T2> {
+        private final T1 item;
+        private T2 node;
+
+        Pair(T1 item, T2 node) {
+            this.item = item;
+            this.node = node;
         }
     }
 }
