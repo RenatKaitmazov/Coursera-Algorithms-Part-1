@@ -8,9 +8,6 @@ import edu.princeton.cs.algs4.In;
 import java.util.LinkedList;
 import java.util.List;
 
-import static java.lang.Math.abs;
-import static java.lang.Math.min;
-
 /**
  * @author Renat Kaitmazov
  */
@@ -109,15 +106,15 @@ public final class KdTree {
             if (compareResult > 0) {
                 // The point is going to be inserted either in the left or bottom part relative to the current point.
                 // Only the right or the top bound might be changed in this path depending on the level evenness.
-                right = isEvenLevel ? x : right;
-                top = isEvenLevel ? top : y;
+                if (isEvenLevel) right = x;
+                if (!isEvenLevel) top = y;
                 node.smaller = insert(node.smaller, point, left, bottom, right, top, level + 1);
             } else {
                 // The point is going to be inserted either in the right or top part relative to the current point.
                 // If two point are on the same line, by convention, we go to the right/top side.
                 // Only the left or the bottom bound might be changed in this path depending on the level evenness.
-                left = isEvenLevel ? x : left;
-                bottom = isEvenLevel ? bottom : y;
+                if (isEvenLevel) left = x;
+                if (!isEvenLevel) bottom = y;
                 node.greater = insert(node.greater, point, left, bottom, right, top, level + 1);
             }
         }
@@ -179,7 +176,6 @@ public final class KdTree {
 
     private Node nearest(Node node, Point2D queryPoint, Node nearestNode, double nearestDistance) {
         if (node == null) return nearestNode;
-
         // Measure the distance between the current point and the query point.
         final double currentDistance = node.point.distanceSquaredTo(queryPoint);
         if (currentDistance < nearestDistance) {
@@ -187,35 +183,28 @@ public final class KdTree {
             nearestNode = node;
             nearestDistance = currentDistance;
         }
-
         // Go toward the query point as if we are trying to insert it into the tree.
         final Node nextNearestNode = node.nextNearestTo(queryPoint);
         // Find the nearest point in that subtree.
         nearestNode = nearest(nextNearestNode, queryPoint, nearestNode, nearestDistance);
-
-        /*
-         * TODO
-         * do not compute the distance between the query point and the point in a node
-         * if the closest point discovered so far is closer than the distance between
-         * the query point and the rectangle corresponding to the node
-         */
-
-        final double radius = nearestNode.point.distanceTo(queryPoint);
-        if (node.isEvenLevel()) {
-            final double queryPointX = queryPoint.x();
-            final double leftmostX = queryPointX - radius;
-            final double rightmostX = queryPointX + radius;
-            if (leftmostX > node.point.x() || rightmostX < node.point.x()) return nearestNode;
-        } else {
-            final double queryPointY = queryPoint.y();
-            final double bottommostY = queryPointY - radius;
-            final double topmostY = queryPointY + radius;
-            if (bottommostY > node.point.y() || topmostY < node.point.y()) return nearestNode;
-        }
-
+        // The root of the other subtree.
         final Node nextChild = node.nextChild(nextNearestNode);
-        final Node alternativeNode = nearest(nextChild, queryPoint, nearestNode, nearestDistance);
-        return nearestTo(nearestNode, alternativeNode, queryPoint);
+        if (nextChild != null) {
+            // Measure the distance between the the next child's rectangle and the query point if that point is outside
+            // of the bounds of the rectangle.
+            // If that distance is smaller than the current nearest distance, we need to scan the other
+            // part as well to check to see if we have a closer point in that subtree.
+            final double distanceFromRect = nextChild.rect.distanceSquaredTo(queryPoint);
+            // Update the nearest distance, so that it correctly reflects that when returning back from
+            // recursive calls.
+            nearestDistance = nearestNode.point.distanceSquaredTo(queryPoint);
+            if (distanceFromRect < nearestDistance) {
+                // The closest point in that subtree.
+                final Node alternativeNode = nearest(nextChild, queryPoint, nearestNode, nearestDistance);
+                nearestNode = nearestTo(nearestNode, alternativeNode, queryPoint);
+            }
+        }
+        return nearestNode;
     }
 
     private static Node nearestTo(Node lhs, Node rhs, Point2D queryPoint) {
@@ -263,7 +252,7 @@ public final class KdTree {
             final boolean isEvenLevel = isEvenLevel();
             final double queryX = queryPoint.x();
             final double queryY = queryPoint.y();
-            if (isEvenLevel && queryX < point.x() || !isEvenLevel && queryY < point.y()) return smaller;
+            if ((isEvenLevel && queryX < point.x()) || (!isEvenLevel && queryY < point.y())) return smaller;
             return greater;
         }
 
@@ -288,7 +277,7 @@ public final class KdTree {
             brute.insert(p);
         }
 
-        final Point2D queryPoint = new Point2D(0.271484375, 0.36328125);
+        final Point2D queryPoint = new Point2D(0.7, 0.959);
         System.out.println("Query point: " + queryPoint);
         System.out.println(kdtree.nearest(queryPoint));
         System.out.println(brute.nearest(queryPoint));
