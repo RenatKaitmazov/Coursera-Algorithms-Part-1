@@ -184,35 +184,31 @@ public final class KdTree {
             nearestDistance = currentDistance;
         }
         // Go toward the query point as if we are trying to insert it into the tree.
-        final Node nextNearestNode = node.nextNearestTo(queryPoint);
+        final Node closerSubtreeRoot = node.nextNearestTo(queryPoint);
         // Find the nearest point in that subtree.
-        nearestNode = nearest(nextNearestNode, queryPoint, nearestNode, nearestDistance);
+        nearestNode = nearest(closerSubtreeRoot, queryPoint, nearestNode, nearestDistance);
         // The root of the other subtree.
-        final Node nextChild = node.nextChild(nextNearestNode);
-        if (nextChild != null) {
+        final Node fartherSubtreeRoot = node.nextChild(closerSubtreeRoot);
+        if (fartherSubtreeRoot != null) {
             // Measure the distance between the the next child's rectangle and the query point if that point is outside
             // of the bounds of the rectangle.
             // If that distance is smaller than the current nearest distance, we need to scan the other
             // part as well to check to see if we have a closer point in that subtree.
-            final double distanceFromRect = nextChild.rect.distanceSquaredTo(queryPoint);
+            final double distanceFromRect = fartherSubtreeRoot.rect.distanceSquaredTo(queryPoint);
             // Update the nearest distance, so that it correctly reflects that when returning back from
             // recursive calls.
             nearestDistance = nearestNode.point.distanceSquaredTo(queryPoint);
             if (distanceFromRect < nearestDistance) {
                 // The closest point in that subtree.
-                final Node alternativeNode = nearest(nextChild, queryPoint, nearestNode, nearestDistance);
-                nearestNode = nearestTo(nearestNode, alternativeNode, queryPoint);
+                final Node possiblyNearestNode = nearest(fartherSubtreeRoot, queryPoint, nearestNode, nearestDistance);
+                if (possiblyNearestNode != nearestNode &&
+                        possiblyNearestNode.point.distanceSquaredTo(queryPoint) < nearestDistance) {
+                    // Found a closer point in the farther (from the query point) subtree.
+                    nearestNode = possiblyNearestNode;
+                }
             }
         }
         return nearestNode;
-    }
-
-    private static Node nearestTo(Node lhs, Node rhs, Point2D queryPoint) {
-        if (lhs == rhs) return lhs;
-        final double lhsDistance = lhs.point.distanceSquaredTo(queryPoint);
-        final double rhsDistance = rhs.point.distanceSquaredTo(queryPoint);
-        if (lhsDistance < rhsDistance) return lhs;
-        return rhs;
     }
 
     /*--------------------------------------------------------*/
